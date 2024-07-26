@@ -10,6 +10,42 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
         <link rel="stylesheet" href="assets/css/main.css" />
+        <style>
+            /* Additional styles for improved UI/UX */
+            .major h2, .major h3 {
+                border-bottom: 2px solid #ddd;
+                padding-bottom: 10px;
+            }
+            .video-container, .image.object {
+                margin-bottom: 30px;
+            }
+            #topButton {
+                display: none; /* Hidden by default */
+                position: fixed; /* Fixed position */
+                bottom: 20px; /* Place the button 20px from the bottom */
+                right: 30px; /* Place the button 30px from the right */
+                z-index: 99; /* Make sure it does not overlap */
+                border: none; /* Remove borders */
+                outline: none; /* Remove outline */
+                background-color: #000; /* Set background color */
+                color: white; /* Set text color */
+                cursor: pointer; /* Add a pointer on hover */
+                padding: 15px; /* Some padding */
+                border-radius: 10px; /* Rounded corners */
+                font-size: 16px; /* Set font size */
+                line-height: normal; /* Set line height */
+                text-align: center; /* Center the text */
+                vertical-align: middle; /* Center vertically */
+            }
+            #topButton:hover {
+                background-color: #555; /* Add a dark-grey background on hover */
+            }
+            /* Style enhancements for images */
+            .image.object img {
+                border-radius: 8px; /* Rounded corners for images */
+                box-shadow: 0 2px 5px rgba(0,0,0,0.15); /* Subtle shadow */
+            }
+        </style>
     </head>
     <body class="is-preload">
         <!-- Wrapper -->
@@ -23,26 +59,27 @@
                         <ul class="icons">
                             <li><a href="https://github.com/StaffordHo" class="icon brands fa-github"><span class="label">Github</span></a></li>
                             <li><a href="https://www.linkedin.com/in/stafford-ho/" class="icon brands fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
-                            <li><a href="index.html#projects" class="icon solid fa-folder"><span class="label">Projects</span><span class="text">Projects</span></a></li>
-                            <li><a href="resume.pdf" class="icon solid fa-file-alt" target="_blank"><span class="label">Resume</span><span class="text">Resume</span></a></li>
+                            <li><a href="index.html#projects" class="icon solid fa-folder"><span class="label">Projects</span></a><span class="text">Projects</span></a></li>
+                            <li><a href="resume.pdf" class="icon solid fa-file-alt" target="_blank"><span class="label">Resume</span></a><span class="text">Resume</span></a></li>
                         </ul>
                     </header>
 
                     <!-- Content -->
                     <section>
                         <header class="major">
-                            <h2>Project 4</h2>
+                            <h2>Project 4: Assembly Line Automation</h2>
                         </header>
-                        <p>Collaborated with industry partner <a href="bollore.html">Bolloré Logistics</a> in line with academic project: Project 4 to tackle problem statement: "Simulate assembly line automation. Using robotics and machines, the students can also model out before and after automation to show the productivity improvement and reduction of reliance on human resources."</p>
+                        <p>In collaboration with <a href="bollore.html">Bolloré Logistics</a>, this project focuses on simulating assembly line automation. The goal was to demonstrate productivity improvements and reduced reliance on human resources through robotics and machine automation.</p>
+                        
                         <h3>Learning Objectives</h3>
                         <ul>
-                            <li>Display proficiency in ROS2 Framework: Control, MoveIt2, and Gazebo.</li>
-                            <li>Showcase independent learning abilities for new technologies and effective problem-solving.</li>
-                            <li>Demonstrate Project Management skills to align the project team within scope at all times, mitigating risks and ensuring timely project deliverables.</li>
+                            <li>Master the ROS2 Framework including Control, MoveIt2, and Gazebo.</li>
+                            <li>Showcase problem-solving skills and independent learning in new technologies.</li>
+                            <li>Apply Project Management skills to maintain project scope, mitigate risks, and ensure timely deliverables.</li>
                         </ul>
 
                         <h3>Learning Outcomes</h3>
-                        <p>Below are the results of the project: From a real-life demonstration video to the previous iterations.</p>
+                        <p>Results of the project include a real-life demonstration video and documentation of the iterative process.</p>
                         
                         <!-- Video -->
                         <div class="video-container">
@@ -54,44 +91,50 @@
                     </section>
 
                     <section>
-                        
-                        <p>Developed Script in Python language used to configure 6-axis movement of UR10 in roboDK</p>
+                        <h3>Technical Development</h3>
+                        <p>Developed a script in Python to configure the 6-axis movement of a UR10 robot in RoboDK.</p>
                         <!-- Images -->
                         <div class="image object">
-                            <img src="images/coords.jpg" alt="roboDK coords" style="width:100%; margin-bottom:20px;" />
-                            <img src="images/latentpoint.jpg" alt="latent point check" style="width:100%; margin-bottom:20px;" />
+                            <img src="images/coords.jpg" alt="RoboDK coordinates" style="width:100%;" />
+                            <img src="images/latentpoint.jpg" alt="Latent point check" style="width:100%;" />
                         </div>
                         <div class="image object">
-                            <img src="images/OV1.png" alt="OV1 system" style="width:100%; margin-bottom:20px;" />
+                            <img src="images/OV1.png" alt="OV1 system overview" style="width:100%;" />
                         </div>
                     </section>
 
                     <section>
-                        <p>Applied Arcadia and Capella skills to design solution architectures.</p>
+                        <h3>System Architecture Design</h3>
+                        <p>Applied Arcadia and Capella methodologies to design solution architectures.</p>
                         <!-- Images -->
                         <div class="image object">
-                            <img src="images/MALSysArch.png" alt="mal boundary" style="width:100%; margin-bottom:20px;" />
+                            <img src="images/MALSysArch.png" alt="System architecture diagram" style="width:100%;" />
                         </div>
                     </section>
 
                     <section>
                         <h3>Prototyping & Fabrications</h3>
-                        <p>Evolved an electrical conveyor belt into a variable conveyor belt that is capable of handling high-mix low-volume (HMLV).</p>
+                        <p>Innovated a variable conveyor belt system capable of handling high-mix low-volume (HMLV) products.</p>
                         <!-- Images -->
                         <div class="image object">
-                            <img src="images/vcb.jpg" alt="variable conveyor belt" style="width:100%; margin-bottom:20px;" />
-                            <img src="images/vcbclose.jpg" alt="variable conveyor belt" style="width:100%; margin-bottom:20px;" />
-                            <p>Fabricated a mount for LIMO robot that runs on a program on STM32F303RE MCU to send commands to activate a servo motor to open/close flaps and tilt the mount.</p>
-                            <img src="images/m1.jpg" alt="mount for limo" style="width:100%; margin-bottom:20px;" />
-                            <img src="images/m2.jpg" alt="mount for limo" style="width:100%; margin-bottom:20px;" />
-                            <p>Designed a housing for DC vacuum motor that generates vacuum for the suction cup end-effector.</p>
-                            <img src="images/DC.jpg" alt="dc motor housing" style="width:100%; margin-bottom:20px;" />
-                            <img src="images/DCfull.jpg" alt="full dc motor housing" style="width:100%; margin-bottom:20px;" />
-                            <p>A static mechanical conveyor belt used for the demonstration to represent a variable conveyor belt shown above.</p>
-                            <img src="images/mcb.jpg" alt="mechanical conveyor belt" style="width:100%; margin-bottom:20px;" />
+                            <img src="images/vcb.jpg" alt="Variable conveyor belt" style="width:100%;" />
+                            <img src="images/vcbclose.jpg" alt="Close-up of conveyor belt" style="width:100%;" />
+                        </div>
+                        <p>Fabricated a mount for the LIMO robot, integrating an STM32F303RE MCU for servo motor control, allowing the opening/closing of flaps and tilt adjustments.</p>
+                        <div class="image object">
+                            <img src="images/m1.jpg" alt="Mount for LIMO robot" style="width:100%;" />
+                            <img src="images/m2.jpg" alt="Mount for LIMO robot" style="width:100%;" />
+                        </div>
+                        <p>Designed a housing for a DC vacuum motor used to generate suction for the end-effector.</p>
+                        <div class="image object">
+                            <img src="images/DC.jpg" alt="DC motor housing" style="width:100%;" />
+                            <img src="images/DCfull.jpg" alt="Complete DC motor housing" style="width:100%;" />
+                        </div>
+                        <p>A static mechanical conveyor belt was also used to simulate variable conveyor belt functionality during demonstrations.</p>
+                        <div class="image object">
+                            <img src="images/mcb.jpg" alt="Mechanical conveyor belt" style="width:100%;" />
                         </div>
                     </section>
-                    
                 </div>
             </div>
 
@@ -133,8 +176,7 @@
                         <ul class="contact">
                             <li class="icon solid fa-envelope"><a href="mailto:stafford_ho@rocketmail.com">stafford_ho@rocketmail.com</a></li>
                             <li class="icon solid fa-phone"><a href="tel:+6585060453">(+65) 8506 0453</a></li>
-                            <li class="icon solid fa-home">10 Dover Drive<br />
-                            Singapore 138683</li>
+                            <li class="icon solid fa-home">10 Dover Drive<br />Singapore 138683</li>
                         </ul>
                     </section>
 
