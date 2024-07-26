@@ -152,11 +152,32 @@
             </div>
         </div>
 
+        <!-- Go to Top Button -->
+        <button id="topButton" onclick="scrollToTop()" title="Go to top">Top</button>
+
         <!-- Scripts -->
         <script src="assets/js/jquery.min.js"></script>
         <script src="assets/js/browser.min.js"></script>
         <script src="assets/js/breakpoints.min.js"></script>
         <script src="assets/js/util.js"></script>
         <script src="assets/js/main.js"></script>
+        <script>
+            // JavaScript to scroll to the top
+            function scrollToTop() {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            // Show the button when the user scrolls down 20px from the top of the document
+            window.onscroll = function() {scrollFunction()};
+
+            function scrollFunction() {
+                var topButton = document.getElementById("topButton");
+                if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                    topButton.style.display = "block";
+                } else {
+                    topButton.style.display = "none";
+                }
+            }
+        </script>
     </body>
 </html>
