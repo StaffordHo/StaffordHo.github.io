@@ -2285,6 +2285,10 @@ button,
     cursor: pointer; /* Add a pointer on hover */
     padding: 15px; /* Some padding */
     border-radius: 10px; /* Rounded corners */
+    font-size: 16px; /* Set font size */
+    line-height: normal; /* Set line height */
+    text-align: center; /* Center the text */
+    vertical-align: middle; /* Center vertically */
 }
 
 #topButton:hover {
