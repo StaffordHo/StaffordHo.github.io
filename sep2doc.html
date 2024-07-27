@@ -64,14 +64,14 @@
                         <header class="major">
                             <h2>Systems Engineering Project 2 (SEP2) Technical Documentation</h2>
                         </header>
-                        <p>Here is a database of Technical Documentation taken from Systems Engineering Project 2 focusing on Evebot Automation Solution Y (EASY)</p>
+                        <p>Here is a database of Technical Documentation taken from Systems Engineering Project 2 focusing on EVEBOT Automation Solution Y (EASY)</p>
                         
-                        <!-- Documentation Section -->
+                                            <!-- Documentation Section -->
                     <section>
                         <h3>Description</h3>
-                        <p>The system consists of key <a href="sep2doc.html#Components">components</a> reflecting functionalities such as:</p>
+                        <p>The system consists of key components reflecting functionalities such as:</p>
                         <ul>
-                            <li>Pixy2 Camera for positional guidance</li>
+                            <li>Pixy Camera for positional guidance</li>
                             <li>PrintHead/X Axis Carriage for X Axis Movement</li>
                             <li>Conveyor for Y Axis Movement</li>
                             <li>Guiding Rod attached to printhead for Z Axis Movement</li>
@@ -81,7 +81,7 @@
                         <p>The software integrates all of the components, with the keypad being the control panel, X and Y axes fully automated with PixyCam as the main driver for positional movement, and manual/human control for the Z Axis.</p>
 
                         <h3>Pixy Camera For Positional Guidance</h3>
-                        <p>The <code>Pixy Camera</code> interprets the conveyor belt based on image recognition. These objects are pastries, with <em>colour signature</em> boxes on them.</p>
+                        <p>The <code>Pixy Camera</code> interprets the conveyor belt based on image recognition. These objects are pastries, with <em>colour signature</em> boxes on them. Based on the axes, towards the right, the x value increases. As you go down, the y value increases.</p>
 
                         <div class="image-container">
                             <img src="https://github.com/user-attachments/assets/bd544ce3-9286-47e4-9e27-31b1b18a1eff" alt="Image" />
@@ -102,6 +102,209 @@
     uint16_t numberOfRowObjects;
     uint16_t coordXArray[10];
 } Row;</code></pre>
+
+                        <p>The program creates a reference point for a <code>Row</code>, as described in the code snippet below. The bottommost pastry, i.e., the pastry closest to the <em>PRINTLINE</em>, is the reference point for a <code>Row</code>.</p>
+
+                        <pre><code>for(int j = 0; j<numberOfBlocks; ++j)
+{
+    //find the lowest centre point of an object within a "row" AND ONLY IF
+    //The bottom width of the object is before the EVENT HORIZON
+    //the lowest centre point of the object will be the main reference for a "row"
+
+    if(pastry[j].coordY > rowval && pastry[j].bottomY <= EVENT_HORIZON) // EVENT_HORIZON is PRINTLINE - 10 pixels (Before PRINTLINE, hence subtract)
+    {
+        rowval = pastry[j].coordY;
+    }
+}</code></pre>
+
+                        <p>The program first finds the pastry closest to the <em>PRINTLINE</em>, i.e., the bottommost pastry along the Y Axis, by looking at the <em>centre points</em> of these pastries. The bottommost pastry is selected at the end of the <strong>for loop</strong>. This is the program's <strong>first condition</strong>.</p>
+
+                        <p>The <strong>second condition</strong> dictates that the pastry selected as the reference for the <code>Row</code> must have its bottom width <strong>before</strong> the <em>PRINT_LINE</em> + 10 pixels line.</p>
+
+                        <div class="image-container">
+                            <img src="https://github.com/user-attachments/assets/3d105be6-bf91-4f05-8790-1a99ae46733b" alt="Image" />
+                        </div>
+
+                        <p>The image above describes a row being created because it <strong>meets the two conditions mentioned</strong>.</p>
+
+                        <div class="image-container">
+                            <img src="https://github.com/user-attachments/assets/b0bcb62c-8961-493a-af73-fce657c0e12b" alt="Image" />
+                        </div>
+
+                        <p>The image above shows that <strong>no row is created</strong> because it <strong>does not meet the second condition</strong>.</p>
+
+                        <h5>Adding Pastries to the Row Object</h5>
+                        <p>Once the <code>Row</code> reference point is selected, i.e., closest to the <em>PRINT_LINE</em>, the program now adds other pastries along the Y axis within a set buffer.</p>
+
+                        <p>Taking <code>Row.coordRow_Y</code>, which was set as a reference point along the Y axis, i.e., conveyor, the program looks for pastries with centre points within <code>Row.coordRow_Y</code> and <code>Row.coordRow_Y - 10</code>. The snippet describes this pastry selection for the <code>Row</code> object.</p>
+
+                        <pre><code>for(int i = 0; i < numberOfBlocks; ++i) // loop for the no objects
+{
+    // since the lowest centrepoint is the reference for the row,
+    // we account for objects within the gap
+    // before the lowest centrepoint
+    if(pastry[i].coordY >= (rowval - 10) && pastry[i].coordY <= rowval) {
+        row.coordXArray[i] = pastry[i].coordX;
+        row.numberOfRowObjects++;
+    }
+}</code></pre>
+
+                        <div class="image-container">
+                            <img src="https://github.com/user-attachments/assets/046f05f3-0cde-4423-9ccf-0cb6a21168b1" alt="Image" />
+                        </div>
+
+                        <p>Hence, a row is created with the <code>Row.coordXArray[]</code> <strong>filled with the centre points of pastries along the x axis</strong>.</p>
+
+                        <h5>Sorting the Row.coordXArray[]</h5>
+                        <p>The row of x coordinates is sorted from smallest (closest to the origin or printhead) to the largest. This ensures that the printhead goes in proper sequence from left to right.</p>
+
+                        <pre><code>bubbleSort(row.coordXArray, 10);</code></pre>
+
+                        <h3>X Axis Print Head Movement</h3>
+                        <p>The X Axis Movement has the following <strong>key</strong> functions to guide the printhead to locations where the pastry is placed based on the pixy camera.</p>
+
+                        <ul>
+                            <li><code>printHeadMovementRoutine_AUTO()</code></li>
+                            <li><code>printHeadMovementRoutine_Manual()</code></li>
+                        </ul>
+
+                        <p>Both of these functions share the same sequence, except that <code>printHeadMovementRoutine_Manual()</code> does not have <code>pressEveBot()</code>, therefore requiring a human to press within a 3 seconds window given.</p>
+
+                        <p>These two functions execute a logical sequence, calling helper functions shown in the following diagram below:</p>
+
+                        <p><code>xAxisMovement((row.coordXArray[i] - datum) * PIXY_RATIO)</code></p>
+
+                        <p>The <code>xAxisMovement((row.coordXArray[i] - datum) * PIXY_RATIO)</code> moves the printhead to the centre points of pastries, starting with the first pastry. The <code>datum</code> is a preset value that offsets the printhead from the centre point of a pastry. <code>PIXY_RATIO</code> is a ratio used to convert the <strong>number of pixels</strong> from <code>(row.coordXArray[i] - datum)</code> into distance (mm).</p>
+
+                        <div class="image-container">
+                            <img src="https://github.com/user-attachments/assets/b557da16-8e1d-4f7b-ba70-d70d0010371d" alt="Image" />
+                        </div>
+
+                        <p><code>iniDelay()</code></p>
+
+                        <p>Once arrived at the location within an offset from the centre point of the pastry, the program commences <code>iniDelay()</code>. <code>iniDelay()</code> covers the distance gap EveBot is required to roll before actual printing commences. The distance gap was measured from the EveBot ruler illustrated below.</p>
+
+                        <div class="image-container">
+                            <img src="https://github.com/user-attachments/assets/09bf2aea-fd86-43e3-bcc7-4227ca1040fb" alt="Image" />
+                        </div>
+
+                        <p><code>xAxisMovement(PRINTSIZE)</code></p>
+
+                        <p>The printhead then moves according to the PRINTSIZE specified by the user via the <strong>keypad interface</strong>. The default value for <code>PRINTSIZE</code> is 43.</p>
+
+                        <div class="image-container">
+                            <img src="https://github.com/user-attachments/assets/75560c5b-b7f5-457a-84ca-2ebc1df672f0" alt="Image" />
+                        </div>
+
+                        <p><code>backToHomePosition()</code></p>
+
+                        <p>This function moves the printhead back to the HOME position, i.e., until it hits the limit switch at HOME. Within this function, the program sends <strong>HIGH</strong> and <strong>LOW</strong> pulses until the limit switch toggles. The following diagram illustrates this:</p>
+
+                        <div class="image-container">
+                            <img src="https://github.com/user-attachments/assets/65b69bdd-a2d8-498a-bf1a-959c94c0d5e4" alt="Image" />
+                        </div>
+
+                        <p><code>pressEveBot()</code></p>
+
+                        <p>This function sends PWM signals generated by the <code>TIM3</code> peripheral to the servo motor attached to our mechanical button presser, as shown below. It retracts the pinion presser up, before pressing down and goes back up again.</p>
+
+                        <h4>More information about the Helper Functions</h4>
+                        <p><code>xAxisMovement(int distance)</code></p>
+
+                        <p>The function converts the argument that the program assumes into <strong>steps</strong> for the stepper motor. The <strong>steps</strong> are for loop iterations, which sends <strong>HIGH</strong> and <strong>LOW</strong> pulses in <strong>alternating and fixed microseconds interval</strong> to the motor driver. This routine is similar to conveyor stepper motor and z-axis stepper motor movement, except with differing values. The following code below showcases this:</p>
+
+                        <pre><code>void xAxisMovement(int distance){
+    int dist = distCal(distance);
+    int stepDelay = 1900;
+    for(int x = 0; x < dist; ++x)
+    {
+        HAL_GPIO_TogglePin(PRINTHEAD_STEP_PORT, PRINTHEAD_STEP_PIN);
+        microDelay(stepDelay);
+    }
+}</code></pre>
+
+                        <p><code>pressEveBot()</code></p>
+
+                        <p>The <code>STM32F103RB</code> is configured to generate PWM signals at 50HZ.</p>
+
+                        <pre><code>__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, RETRACT_PEN_UP);
+HAL_Delay(500);
+__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, EXTEND_PEN_DOWN);
+HAL_Delay(500);
+__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, RETRACT_PEN_UP);
+HAL_Delay(500);</code></pre>
+
+                        <p>The <code>__HAL_TIM_SET_COMPARE()</code> describes <code>TIM3</code> being used, while the third parameter is the <strong>duty cycle</strong> you would like to set. Since the counter period is set to 1000 on the STM, <code>RETRACT_PEN_UP</code> and <code>EXTEND_PEN_DOWN</code> are given values of <strong>200</strong> and <strong>336</strong> respectively. That means divided by the counter period, <strong>duty cycles are 20% and 36% respectively</strong>.</p>
+
+                        <h3>Y Axis Print Head Movement</h3>
+                        <p>The Y Axis Movement has the following <strong>key</strong> functions to guide and move the conveyor belt to move the tray of pastries along the Y axis.</p>
+
+                        <ul>
+                            <li><code>conveyorMovement(int z)</code></li>
+                        </ul>
+
+                        <p>Similar to <code>xAxisMovement(int distance)</code>, the function moves the conveyor stepper motor, as specified by <code>int z</code> (distance in mm).</p>
+
+                        <ul>
+                            <li><code>conveyorMovePastry()</code></li>
+                        </ul>
+
+                        <p>This function additionally computes the distance required to move the <strong>reference point</strong> of a row to the <em>PRINTLINE</em>.</p>
+
+                        <p><code>row.coordRow_Y</code> is the <strong>difference in distance in pixels</strong> between the <em>PRINTLINE</em> and the <strong>y coordinate</strong> of the <code>row</code> reference point, i.e., the lowest pastry in the row. The following code snippet and a visual diagram illustrate this.</p>
+
+                        <pre><code>void conveyorMovePastry(){
+    int distanceToTravel = row.coordRow_Y * PIXY_RATIO;
+    conveyorMovement(distanceToTravel);
+}</code></pre>
+
+                        <div class="image-container">
+                            <img src="https://github.com/user-attachments/assets/9385b23c-a41c-487c-a324-9f9cae496d1e" alt="Image" />
+                        </div>
+
+                        <h3>Z Axis Print Head Movement</h3>
+                        <p>The Z Axis Movement moves the print carriage vertically (upwards or downwards). The diagram below shows where the z-axis stepper motor and guiding rod is at:</p>
+
+                        <ul>
+                            <li><code>void moveZAxisUp()</code></li>
+                            <li><code>void moveZAxisDown()</code></li>
+                        </ul>
+
+                        <pre><code>void moveZAxisUp(){
+    int conveyorStepperDelay = 2000;
+    GPIO_PinState zAxisDirectionStatus = HAL_GPIO_ReadPin(GPIOC, DIR_Z_AXIS_Pin);
+    if(zAxisDirectionStatus == GPIO_PIN_RESET){
+        HAL_GPIO_TogglePin(GPIOC, DIR_Z_AXIS_Pin);
+        HAL_Delay(1);
+    }
+    HAL_GPIO_TogglePin(GPIOC, STEP_Z_AXIS_Pin);
+    microDelay(conveyorStepperDelay);
+}</code></pre>
+
+                        <pre><code>void moveZAxisDown(){
+    int conveyorStepperDelay = 2000;
+    GPIO_PinState zAxisDirectionStatus = HAL_GPIO_ReadPin(GPIOC, DIR_Z_AXIS_Pin);
+    if(zAxisDirectionStatus == GPIO_PIN_SET){
+        HAL_GPIO_TogglePin(GPIOC, DIR_Z_AXIS_Pin);
+        HAL_Delay(1);
+    }
+    HAL_GPIO_TogglePin(GPIOC, STEP_Z_AXIS_Pin);
+    microDelay(conveyorStepperDelay);
+}</code></pre>
+
+                        <h3>Final Overview of the X Axis and Y Axis PrintHead and Conveyor Movement Routine (Flow Chart)</h3>
+
+                        <div class="image-container">
+                            <img src="https://github.com/user-attachments/assets/0ab22698-b60b-439c-8399-0b588207aeb3" alt="Flow Chart" />
+                        </div>
+
+                        <div class="image-container">
+                            <img src="https://github.com/user-attachments/assets/fa0682cc-7a3a-4d1d-9bf0-75fd7f4fd938" alt="Flow Chart" />
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
                         <section id="components">
                         <h3>Components</h3>
                         <p>Isometric view of EASY as a whole.</p>
