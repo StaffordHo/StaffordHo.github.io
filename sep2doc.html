@@ -1,9 +1,4 @@
 <!DOCTYPE HTML>
-<!--
-    Editorial by HTML5 UP
-    html5up.net | @ajlkn
-    Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
--->
 <html>
     <head>
         <title>SEP2 Documentation</title>
@@ -33,9 +28,6 @@
                 padding: 15px; /* Some padding */
                 border-radius: 10px; /* Rounded corners */
                 font-size: 16px; /* Set font size */
-                line-height: normal; /* Set line height */
-                text-align: center; /* Center the text */
-                vertical-align: middle; /* Center vertically */
             }
             #topButton:hover {
                 background-color: #555; /* Add a dark-grey background on hover */
@@ -54,8 +46,8 @@
                         <ul class="icons">
                             <li><a href="https://github.com/StaffordHo" class="icon brands fa-github"><span class="label">Github</span></a></li>
                             <li><a href="https://www.linkedin.com/in/stafford-ho/" class="icon brands fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
-                            <li><a href="index.html#projects" class="icon solid fa-folder"><span class="label">Projects</span></a><span class="text">Projects</span></a></li>
-                            <li><a href="resume.pdf" class="icon solid fa-file-alt" target="_blank"><span class="label">Resume</span></a><span class="text">Resume</span></a></li>
+                            <li><a href="index.html#projects" class="icon solid fa-folder"><span class="label">Projects</span></a></li>
+                            <li><a href="resume.pdf" class="icon solid fa-file-alt" target="_blank"><span class="label">Resume</span></a></li>
                         </ul>
                     </header>
 
@@ -66,46 +58,46 @@
                         </header>
                         <p>Here is a database of Technical Documentation taken from Systems Engineering Project 2 focusing on EVEBOT Automation Solution Y (EASY)</p>
                         
-                                            <!-- Documentation Section -->
-                    <section>
-                        <h3>Description</h3>
-                        <p>The system consists of key <a href="sep2doc.html#components">components</a> reflecting functionalities such as:</p>
-                        <ul>
-                            <li>Pixy2 Camera for positional guidance</li>
-                            <li>X-Axis Carriage for X-Axis Movement</li>
-                            <li>Conveyor for Y-Axis Movement</li>
-                            <li>Leadscrew attached to X-Axis for Z-Axis Movement</li>
-                            <li>4x4 Keypad for program control</li>
-                        </ul>
+                        <!-- Documentation Section -->
+                        <section>
+                            <h3>Description</h3>
+                            <p>The system consists of key <a href="sep2doc.html#components">components</a> reflecting functionalities such as:</p>
+                            <ul>
+                                <li>Pixy2 Camera for positional guidance</li>
+                                <li>X-Axis Carriage for X-Axis Movement</li>
+                                <li>Conveyor for Y-Axis Movement</li>
+                                <li>Leadscrew attached to X-Axis for Z-Axis Movement</li>
+                                <li>4x4 Keypad for program control</li>
+                            </ul>
 
-                        <p>The software integrates all of the components, with the keypad being the control panel, X and Y axes fully automated with PixyCam as the main driver for positional movement, and manual/human control for the Z-Axis.</p>
+                            <p>The software integrates all of the components, with the keypad being the control panel, X and Y axes fully automated with PixyCam as the main driver for positional movement, and manual/human control for the Z-Axis.</p>
 
-                        <h3>Pixy2 Camera For Positional Guidance</h3>
-                        <p>The <code>Pixy2 Camera</code> interprets the conveyor belt based on image recognition. These objects are artisanal pastries, with <em>colour signature</em> boxes on them. Based on the axes, towards the right, the x value increases. As you go down, the y value increases.</p>
+                            <h3>Pixy2 Camera For Positional Guidance</h3>
+                            <p>The <code>Pixy2 Camera</code> interprets the conveyor belt based on image recognition. These objects are artisanal pastries, with <em>colour signature</em> boxes on them. Based on the axes, towards the right, the x value increases. As you go down, the y value increases.</p>
 
-                        <div class="image-container">
-                            <img src="pg.png" alt="Positional Guidance" />
-                        </div>
+                            <div class="image-container">
+                                <img src="pg.png" alt="Positional Guidance" />
+                            </div>
 
-                        <p>The Pixy camera has two lines to create a <em>row</em> of objects along the X-axis.</p>
+                            <p>The Pixy camera has two lines to create a <em>row</em> of objects along the X-axis.</p>
 
-                        <div class="image-container">
-                            <img src="ro.png" alt="Row Object" />
-                        </div>
+                            <div class="image-container">
+                                <img src="ro.png" alt="Row Object" />
+                            </div>
 
-                        <h4>Row Object</h4>
-                        <h5>Creating a Row Reference Point</h5>
-                        <p>To guide X and Y Axes to move and print on the correct pastries, the program creates a <code>Row</code>, which consists of x coordinates of pastries along the same row, a y coordinate <code>coordRow_Y</code> serving as a reference point to bring the <code>Row</code> to the <em>PRINTLINE</em>, and the number of pastries/objects in the <code>Row</code>.</p>
+                            <h4>Row Object</h4>
+                            <h5>Creating a Row Reference Point</h5>
+                            <p>To guide X and Y Axes to move and print on the correct pastries, the program creates a <code>Row</code>, which consists of x coordinates of pastries along the same row, a y coordinate <code>coordRow_Y</code> serving as a reference point to bring the <code>Row</code> to the <em>PRINTLINE</em>, and the number of pastries/objects in the <code>Row</code>.</p>
 
-                        <pre><code>typedef struct __row{
+                            <pre><code>typedef struct __row{
     uint16_t coordRow_Y;
     uint16_t numberOfRowObjects;
     uint16_t coordXArray[10];
 } Row;</code></pre>
 
-                        <p>The program creates a reference point for a <code>Row</code>, as described in the code snippet below. The bottommost pastry, i.e., the pastry closest to the <em>PRINTLINE</em>, is the reference point for a <code>Row</code>.</p>
+                            <p>The program creates a reference point for a <code>Row</code>, as described in the code snippet below. The bottommost pastry, i.e., the pastry closest to the <em>PRINTLINE</em>, is the reference point for a <code>Row</code>.</p>
 
-                        <pre><code>for(int j = 0; j<numberOfBlocks; ++j)
+                            <pre><code>for(int j = 0; j<numberOfBlocks; ++j)
 {
     //find the lowest centre point of an object within a "row" AND ONLY IF
     //The bottom width of the object is before the EVENT HORIZON
@@ -117,28 +109,28 @@
     }
 }</code></pre>
 
-                        <p>The program first finds the pastry closest to the <em>PRINTLINE</em>, i.e., the bottommost pastry along the Y Axis, by looking at the <em>centre points</em> of these pastries. The bottommost pastry is selected at the end of the <strong>for loop</strong>. This is the program's <strong>first condition</strong>.</p>
+                            <p>The program first finds the pastry closest to the <em>PRINTLINE</em>, i.e., the bottommost pastry along the Y Axis, by looking at the <em>centre points</em> of these pastries. The bottommost pastry is selected at the end of the <strong>for loop</strong>. This is the program's <strong>first condition</strong>.</p>
 
-                        <p>The <strong>second condition</strong> dictates that the pastry selected as the reference for the <code>Row</code> must have its bottom width <strong>before</strong> the <em>PRINT_LINE</em> + 10 pixels line.</p>
+                            <p>The <strong>second condition</strong> dictates that the pastry selected as the reference for the <code>Row</code> must have its bottom width <strong>before</strong> the <em>PRINT_LINE</em> + 10 pixels line.</p>
 
-                        <div class="image-container">
-                            <img src="cp.png" alt="Centrepoint" />
-                        </div>
+                            <div class="image-container">
+                                <img src="cp.png" alt="Centrepoint" />
+                            </div>
 
-                        <p>The image above describes a row being created because it <strong>meets the two conditions mentioned</strong>.</p>
+                            <p>The image above describes a row being created because it <strong>meets the two conditions mentioned</strong>.</p>
 
-                        <div class="image-container">
-                            <img src="pl.png" alt="Printline" />
-                        </div>
+                            <div class="image-container">
+                                <img src="pl.png" alt="Printline" />
+                            </div>
 
-                        <p>The image above shows that <strong>no row is created</strong> because it <strong>does not meet the second condition</strong>.</p>
+                            <p>The image above shows that <strong>no row is created</strong> because it <strong>does not meet the second condition</strong>.</p>
 
-                        <h5>Adding Pastries to the Row Object</h5>
-                        <p>Once the <code>Row</code> reference point is selected, i.e., closest to the <em>PRINT_LINE</em>, the program now adds other pastries along the Y axis within a set buffer.</p>
+                            <h5>Adding Pastries to the Row Object</h5>
+                            <p>Once the <code>Row</code> reference point is selected, i.e., closest to the <em>PRINT_LINE</em>, the program now adds other pastries along the Y axis within a set buffer.</p>
 
-                        <p>Taking <code>Row.coordRow_Y</code>, which was set as a reference point along the Y axis, i.e., conveyor, the program looks for pastries with centre points within <code>Row.coordRow_Y</code> and <code>Row.coordRow_Y - 10</code>. The snippet describes this pastry selection for the <code>Row</code> object.</p>
+                            <p>Taking <code>Row.coordRow_Y</code>, which was set as a reference point along the Y axis, i.e., conveyor, the program looks for pastries with centre points within <code>Row.coordRow_Y</code> and <code>Row.coordRow_Y - 10</code>. The snippet describes this pastry selection for the <code>Row</code> object.</p>
 
-                        <pre><code>for(int i = 0; i < numberOfBlocks; ++i) // loop for the no objects
+                            <pre><code>for(int i = 0; i < numberOfBlocks; ++i) // loop for the no objects
 {
     // since the lowest centrepoint is the reference for the row,
     // we account for objects within the gap
@@ -149,73 +141,73 @@
     }
 }</code></pre>
 
-                        <div class="image-container">
-                            <img src="cppl.png" alt="centrepoint within printline" />
-                        </div>
+                            <div class="image-container">
+                                <img src="cppl.png" alt="centrepoint within printline" />
+                            </div>
 
-                        <p>Hence, a row is created with the <code>Row.coordXArray[]</code> <strong>filled with the centre points of pastries along the x axis</strong>.</p>
+                            <p>Hence, a row is created with the <code>Row.coordXArray[]</code> <strong>filled with the centre points of pastries along the x axis</strong>.</p>
 
-                        <h5>Sorting the Row.coordXArray[]</h5>
-                        <p>The row of x coordinates is sorted from smallest (closest to the origin or printhead) to the largest. This ensures that the printhead goes in proper sequence from left to right.</p>
+                            <h5>Sorting the Row.coordXArray[]</h5>
+                            <p>The row of x coordinates is sorted from smallest (closest to the origin or printhead) to the largest. This ensures that the printhead goes in proper sequence from left to right.</p>
 
-                        <pre><code>bubbleSort(row.coordXArray, 10);</code></pre>
+                            <pre><code>bubbleSort(row.coordXArray, 10);</code></pre>
 
-                        <h3>X Axis Print Head Movement</h3>
-                        <p>The X Axis Movement has the following <strong>key</strong> functions to guide the printhead to locations where the pastry is placed based on the pixy camera.</p>
+                            <h3>X Axis Print Head Movement</h3>
+                            <p>The X Axis Movement has the following <strong>key</strong> functions to guide the printhead to locations where the pastry is placed based on the pixy camera.</p>
 
-                        <ul>
-                            <li><code>printHeadMovementRoutine_AUTO()</code></li>
-                            <li><code>printHeadMovementRoutine_Manual()</code></li>
-                        </ul>
+                            <ul>
+                                <li><code>printHeadMovementRoutine_AUTO()</code></li>
+                                <li><code>printHeadMovementRoutine_Manual()</code></li>
+                            </ul>
 
-                        <p>Both of these functions share the same sequence, except that <code>printHeadMovementRoutine_Manual()</code> does not have <code>pressEveBot()</code>, therefore requiring a human to press within a 3 seconds window given.</p>
+                            <p>Both of these functions share the same sequence, except that <code>printHeadMovementRoutine_Manual()</code> does not have <code>pressEveBot()</code>, therefore requiring a human to press within a 3 seconds window given.</p>
 
-                        <p>These two functions execute a logical sequence, calling helper functions shown in the following diagram below:</p>
+                            <p>These two functions execute a logical sequence, calling helper functions shown in the following diagram below:</p>
 
-                        <p><code>xAxisMovement((row.coordXArray[i] - datum) * PIXY_RATIO)</code></p>
+                            <p><code>xAxisMovement((row.coordXArray[i] - datum) * PIXY_RATIO)</code></p>
 
-                        <p>The <code>xAxisMovement((row.coordXArray[i] - datum) * PIXY_RATIO)</code> moves the printhead to the centre points of pastries, starting with the first pastry. The <code>datum</code> is a preset value that offsets the printhead from the centre point of a pastry. <code>PIXY_RATIO</code> is a ratio used to convert the <strong>number of pixels</strong> from <code>(row.coordXArray[i] - datum)</code> into distance (mm).</p>
+                            <p>The <code>xAxisMovement((row.coordXArray[i] - datum) * PIXY_RATIO)</code> moves the printhead to the centre points of pastries, starting with the first pastry. The <code>datum</code> is a preset value that offsets the printhead from the centre point of a pastry. <code>PIXY_RATIO</code> is a ratio used to convert the <strong>number of pixels</strong> from <code>(row.coordXArray[i] - datum)</code> into distance (mm).</p>
 
-                        <p>The diagram below illustrates this function.</p>
-                        
-                        <div class="image-container">
-                            <img src="Xmove.png" alt="XAxis move" />
-                        </div>
+                            <p>The diagram below illustrates this function.</p>
+                            
+                            <div class="image-container">
+                                <img src="Xmove.png" alt="XAxis move" />
+                            </div>
 
-                        <p><code>iniDelay()</code></p>
+                            <p><code>iniDelay()</code></p>
 
-                        <p>Once arrived at the location within an offset from the centre point of the pastry, the program commences <code>iniDelay()</code>. <code>iniDelay()</code> covers the distance gap EveBot is required to roll before actual printing commences. The distance gap was measured from the EveBot ruler illustrated below.</p>
+                            <p>Once arrived at the location within an offset from the centre point of the pastry, the program commences <code>iniDelay()</code>. <code>iniDelay()</code> covers the distance gap EveBot is required to roll before actual printing commences. The distance gap was measured from the EveBot ruler illustrated below.</p>
 
-                        <div class="image-container">
-                            <img src="Xbuffer.png" alt="buffer for print" />
-                        </div>
+                            <div class="image-container">
+                                <img src="Xbuffer.png" alt="buffer for print" />
+                            </div>
 
-                        <p><code>xAxisMovement(PRINTSIZE)</code></p>
+                            <p><code>xAxisMovement(PRINTSIZE)</code></p>
 
-                        <p>The printhead then moves according to the PRINTSIZE specified by the user via the <strong>keypad interface</strong>. The default value for <code>PRINTSIZE</code> is 43.</p>
+                            <p>The printhead then moves according to the PRINTSIZE specified by the user via the <strong>keypad interface</strong>. The default value for <code>PRINTSIZE</code> is 43.</p>
 
-                        <div class="image-container">
-                            <img src="Xprint.png" alt="print proper" />
-                        </div>
+                            <div class="image-container">
+                                <img src="Xprint.png" alt="print proper" />
+                            </div>
 
-                        <p><code>backToHomePosition()</code></p>
+                            <p><code>backToHomePosition()</code></p>
 
-                        <p>This function moves the printhead back to the HOME position, i.e., until it hits the limit switch at HOME. Within this function, the program sends <strong>HIGH</strong> and <strong>LOW</strong> pulses until the limit switch toggles. The following diagram illustrates this:</p>
+                            <p>This function moves the printhead back to the HOME position, i.e., until it hits the limit switch at HOME. Within this function, the program sends <strong>HIGH</strong> and <strong>LOW</strong> pulses until the limit switch toggles. The following diagram illustrates this:</p>
 
-                        <div class="image-container">
-                            <img src="Xhome.png" alt="Image" />
-                        </div>
+                            <div class="image-container">
+                                <img src="Xhome.png" alt="Image" />
+                            </div>
 
-                        <p><code>pressEveBot()</code></p>
+                            <p><code>pressEveBot()</code></p>
 
-                        <p>This function sends PWM signals generated by the <code>TIM3</code> peripheral to the servo motor attached to our mechanical button presser, as shown below. It retracts the pinion presser up, before pressing down and goes back up again.</p>
+                            <p>This function sends PWM signals generated by the <code>TIM3</code> peripheral to the servo motor attached to our mechanical button presser, as shown below. It retracts the pinion presser up, before pressing down and goes back up again.</p>
 
-                        <h4>More information about the Helper Functions</h4>
-                        <p><code>xAxisMovement(int distance)</code></p>
+                            <h4>More information about the Helper Functions</h4>
+                            <p><code>xAxisMovement(int distance)</code></p>
 
-                        <p>The function converts the argument that the program assumes into <strong>steps</strong> for the stepper motor. The <strong>steps</strong> are for loop iterations, which sends <strong>HIGH</strong> and <strong>LOW</strong> pulses in <strong>alternating and fixed microseconds interval</strong> to the motor driver. This routine is similar to conveyor stepper motor and z-axis stepper motor movement, except with differing values. The following code below showcases this:</p>
+                            <p>The function converts the argument that the program assumes into <strong>steps</strong> for the stepper motor. The <strong>steps</strong> are for loop iterations, which sends <strong>HIGH</strong> and <strong>LOW</strong> pulses in <strong>alternating and fixed microseconds interval</strong> to the motor driver. This routine is similar to conveyor stepper motor and z-axis stepper motor movement, except with differing values. The following code below showcases this:</p>
 
-                        <pre><code>void xAxisMovement(int distance){
+                            <pre><code>void xAxisMovement(int distance){
     int dist = distCal(distance);
     int stepDelay = 1900;
     for(int x = 0; x < dist; ++x)
@@ -225,54 +217,54 @@
     }
 }</code></pre>
 
-                        <p><code>pressEveBot()</code></p>
+                            <p><code>pressEveBot()</code></p>
 
-                        <p>The <code>STM32F103RB</code> is configured to generate PWM signals at 50HZ.</p>
+                            <p>The <code>STM32F103RB</code> is configured to generate PWM signals at 50HZ.</p>
 
-                        <pre><code>__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, RETRACT_PEN_UP);
+                            <pre><code>__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, RETRACT_PEN_UP);
 HAL_Delay(500);
 __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, EXTEND_PEN_DOWN);
 HAL_Delay(500);
 __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, RETRACT_PEN_UP);
 HAL_Delay(500);</code></pre>
 
-                        <p>The <code>__HAL_TIM_SET_COMPARE()</code> describes <code>TIM3</code> being used, while the third parameter is the <strong>duty cycle</strong> you would like to set. Since the counter period is set to 1000 on the STM, <code>RETRACT_PEN_UP</code> and <code>EXTEND_PEN_DOWN</code> are given values of <strong>200</strong> and <strong>336</strong> respectively. That means divided by the counter period, <strong>duty cycles are 20% and 36% respectively</strong>.</p>
+                            <p>The <code>__HAL_TIM_SET_COMPARE()</code> describes <code>TIM3</code> being used, while the third parameter is the <strong>duty cycle</strong> you would like to set. Since the counter period is set to 1000 on the STM, <code>RETRACT_PEN_UP</code> and <code>EXTEND_PEN_DOWN</code> are given values of <strong>200</strong> and <strong>336</strong> respectively. That means divided by the counter period, <strong>duty cycles are 20% and 36% respectively</strong>.</p>
 
-                        <h3>Y Axis Print Head Movement</h3>
-                        <p>The Y Axis Movement has the following <strong>key</strong> functions to guide and move the conveyor belt to move the tray of pastries along the Y axis.</p>
+                            <h3>Y Axis Print Head Movement</h3>
+                            <p>The Y Axis Movement has the following <strong>key</strong> functions to guide and move the conveyor belt to move the tray of pastries along the Y axis.</p>
 
-                        <ul>
-                            <li><code>conveyorMovement(int z)</code></li>
-                        </ul>
+                            <ul>
+                                <li><code>conveyorMovement(int z)</code></li>
+                            </ul>
 
-                        <p>Similar to <code>xAxisMovement(int distance)</code>, the function moves the conveyor stepper motor, as specified by <code>int z</code> (distance in mm).</p>
+                            <p>Similar to <code>xAxisMovement(int distance)</code>, the function moves the conveyor stepper motor, as specified by <code>int z</code> (distance in mm).</p>
 
-                        <ul>
-                            <li><code>conveyorMovePastry()</code></li>
-                        </ul>
+                            <ul>
+                                <li><code>conveyorMovePastry()</code></li>
+                            </ul>
 
-                        <p>This function additionally computes the distance required to move the <strong>reference point</strong> of a row to the <em>PRINTLINE</em>.</p>
+                            <p>This function additionally computes the distance required to move the <strong>reference point</strong> of a row to the <em>PRINTLINE</em>.</p>
 
-                        <p><code>row.coordRow_Y</code> is the <strong>difference in distance in pixels</strong> between the <em>PRINTLINE</em> and the <strong>y coordinate</strong> of the <code>row</code> reference point, i.e., the lowest pastry in the row. The following code snippet and a visual diagram illustrate this.</p>
+                            <p><code>row.coordRow_Y</code> is the <strong>difference in distance in pixels</strong> between the <em>PRINTLINE</em> and the <strong>y coordinate</strong> of the <code>row</code> reference point, i.e., the lowest pastry in the row. The following code snippet and a visual diagram illustrate this.</p>
 
-                        <pre><code>void conveyorMovePastry(){
+                            <pre><code>void conveyorMovePastry(){
     int distanceToTravel = row.coordRow_Y * PIXY_RATIO;
     conveyorMovement(distanceToTravel);
 }</code></pre>
 
-                        <div class="image-container">
-                            <img src="Xref.png" alt="pixy reference point" />
-                        </div>
+                            <div class="image-container">
+                                <img src="Xref.png" alt="pixy reference point" />
+                            </div>
 
-                        <h3>Z Axis Print Head Movement</h3>
-                        <p>The Z Axis Movement moves the print carriage vertically (upwards or downwards). The diagram below shows where the z-axis stepper motor and guiding rod is at:</p>
+                            <h3>Z Axis Print Head Movement</h3>
+                            <p>The Z Axis Movement moves the print carriage vertically (upwards or downwards). The diagram below shows where the z-axis stepper motor and guiding rod is at:</p>
 
-                        <ul>
-                            <li><code>void moveZAxisUp()</code></li>
-                            <li><code>void moveZAxisDown()</code></li>
-                        </ul>
+                            <ul>
+                                <li><code>void moveZAxisUp()</code></li>
+                                <li><code>void moveZAxisDown()</code></li>
+                            </ul>
 
-                        <pre><code>void moveZAxisUp(){
+                            <pre><code>void moveZAxisUp(){
     int conveyorStepperDelay = 2000;
     GPIO_PinState zAxisDirectionStatus = HAL_GPIO_ReadPin(GPIOC, DIR_Z_AXIS_Pin);
     if(zAxisDirectionStatus == GPIO_PIN_RESET){
@@ -283,7 +275,7 @@ HAL_Delay(500);</code></pre>
     microDelay(conveyorStepperDelay);
 }</code></pre>
 
-                        <pre><code>void moveZAxisDown(){
+                            <pre><code>void moveZAxisDown(){
     int conveyorStepperDelay = 2000;
     GPIO_PinState zAxisDirectionStatus = HAL_GPIO_ReadPin(GPIOC, DIR_Z_AXIS_Pin);
     if(zAxisDirectionStatus == GPIO_PIN_SET){
@@ -294,161 +286,162 @@ HAL_Delay(500);</code></pre>
     microDelay(conveyorStepperDelay);
 }</code></pre>
 
-                        <h3>Final Overview of the X Axis and Y Axis PrintHead and Conveyor Movement Routine (Flow Chart)</h3>
+                            <h3>Final Overview of the X Axis and Y Axis PrintHead and Conveyor Movement Routine (Flow Chart)</h3>
 
-                        <div class="image-container">
-                            <img src="Xflow.png" alt="X Flow Chart" />
-                        </div>
+                            <div class="image-container">
+                                <img src="Xflow.png" alt="X Flow Chart" />
+                            </div>
 
-                        <div class="image-container">
-                            <img src="Yflow.png" alt="Y Flow Chart" />
-                        </div>
-                    </section>
-                </div>
-            </div>
-        </div>
+                            <div class="image-container">
+                                <img src="Yflow.png" alt="Y Flow Chart" />
+                            </div>
+                        </section>
+
+                        <!-- Components Section -->
                         <section id="components">
-                        <h3>Components</h3>
-                        <p>Isometric view of EASY as a whole.</p>
-                        <div class="image object">
-                            <img src="images/EASY.jpg" alt="EASY" style="width:100%;" />
-                        </div>
-                        <p>X-Axis of EASY.</p>
-                        <div class="image object">
-                            <img src="images/xaxis.jpg" alt="xaxis" style="width:100%;" />
-                        </div>
-                        <p>Y-Axis of EASY.</p>
-                        <div class="image object">
-                            <img src="images/yaxis.jpg" alt="yaxis" style="width:100%;" />
-                        </div>
-                        <p>Z-Axis of EASY.</p>
-                        <div class="image object">
-                            <img src="images/zaxis.jpg" alt="zaxis" style="width:100%;" />
-                        </div>
-                        <p>Microcontroller Unit: STM32F103RB and Colour Detection Camera: Pixy2.</p>
-                        <div class="image object">
-                            <img src="images/pixymcu.jpg" alt="pixymcu" style="width:100%;" />
-                        </div>
-                        <p>EVEBOT Print Reset Mechanism</p>
-                        <div class="image object">
-                            <img src="images/reset.jpg" alt="reset" style="width:100%;" />
-                        </div>
-                        <p>4x4 Keypad for adjusting Z-axis to fit height of object being printed on.</p>
-                        <div class="image object">
-                            <img src="images/keypad.jpg" alt="keypad" style="width:100%;" />
-                        </div>
-                        
-                        <h3>SOLIDWORKS 3D CAD Design</h3>
-                        <p>Isometric view of EASY</p>
-                        <div class="image object">
-                            <img src="images/SolidworksEvebot.png" alt="solidworksfull" style="width:100%;" />
-                        </div>
-                        <p>Isometric view of EVEBOT Print Reset Mechanism</p>
-                        <div class="image object">
-                            <img src="images/SolidworksReset.png" alt="solidworks reset mount" style="width:100%;" />
-                        </div>
-                        <p>Isometric view of EVEBOT Mount</p>
-                        <div class="image object">
-                            <img src="images/SolidworksMount1.png" alt="solidworks evebot mount" style="width:100%;" />
-                        </div>
-                        
-                        <h3>Electrical Diagrams of EASY</h3>
-                        <p>Connections of X-Axis and Z-Axis to A4998 Motor Drivers and MCU.</p>
-                        <div class="image object">
-                            <img src="images/keypad.jpg" alt="keypad" style="width:100%;" />
-                        </div>
-                    
-                        <!-- Videos -->
-                        <div class="video-container">
-                            <video width="100%" controls>
-                                <source src="multiprint1.mp4" type="video/mp4">
-                                Your browser does not support the video tag.
-                            </video>
-                        </div>
-                        <div class="video-container">
-                            <video width="100%" controls>
-                                <source src="multiprint2.mp4" type="video/mp4">
-                                Your browser does not support the video tag.
-                            </video>
-                        </div>
-                        <div class="video-container">
-                            <video width="100%" controls>
-                                <source src="multiprint3.mp4" type="video/mp4">
-                                Your browser does not support the video tag.
-                            </video>
-                        </div>
-                    </section>
-                        
-                    <section>
-                        <h3>Stakeholder Validation</h3>
-                        <p>Identified Stakeholder <a href="nicher.html">Nicher</a> and discussed opportunity for the system in the croissant market.</p>
-                        <div class="image object">
-                            <img src="images/system25jul24.jpg" alt="system25jul24" style="width:100%;" />
-                            <img src="images/testprint0.jpg" alt="successful nichers print" style="width:100%;" />
-                        </div>
-                        <p>We regularly engaged with the stakeholder Nicher to explore potential opportunities for implementing our system in the croissant market. The stakeholder was enthusiastic about our proposed solution and shared our vision for its potential. Successfully printed Nicher's brand logo and the stakeholder found the results acceptable and gave feedback.</p>
-                        <div class="image object">
-                            <img src="images/SV.jpg" alt="Stakeholder Validation" style="width:100%;" />
-                            <img src="images/SAP.jpg" alt="Stakeholder Acceptable Print" style="width:100%;" />
-                        </div>
+                            <h3>Components</h3>
+                            <p>Isometric view of EASY as a whole.</p>
+                            <div class="image object">
+                                <img src="images/EASY.jpg" alt="EASY" style="width:100%;" />
+                            </div>
+                            <p>X-Axis of EASY.</p>
+                            <div class="image object">
+                                <img src="images/xaxis.jpg" alt="xaxis" style="width:100%;" />
+                            </div>
+                            <p>Y-Axis of EASY.</p>
+                            <div class="image object">
+                                <img src="images/yaxis.jpg" alt="yaxis" style="width:100%;" />
+                            </div>
+                            <p>Z-Axis of EASY.</p>
+                            <div class="image object">
+                                <img src="images/zaxis.jpg" alt="zaxis" style="width:100%;" />
+                            </div>
+                            <p>Microcontroller Unit: STM32F103RB and Colour Detection Camera: Pixy2.</p>
+                            <div class="image object">
+                                <img src="images/pixymcu.jpg" alt="pixymcu" style="width:100%;" />
+                            </div>
+                            <p>EVEBOT Print Reset Mechanism</p>
+                            <div class="image object">
+                                <img src="images/reset.jpg" alt="reset" style="width:100%;" />
+                            </div>
+                            <p>4x4 Keypad for adjusting Z-axis to fit height of object being printed on.</p>
+                            <div class="image object">
+                                <img src="images/keypad.jpg" alt="keypad" style="width:100%;" />
+                            </div>
+                            
+                            <h3>SOLIDWORKS 3D CAD Design</h3>
+                            <p>Isometric view of EASY</p>
+                            <div class="image object">
+                                <img src="images/SolidworksEvebot.png" alt="solidworksfull" style="width:100%;" />
+                            </div>
+                            <p>Isometric view of EVEBOT Print Reset Mechanism</p>
+                            <div class="image object">
+                                <img src="images/SolidworksReset.png" alt="solidworks reset mount" style="width:100%;" />
+                            </div>
+                            <p>Isometric view of EVEBOT Mount</p>
+                            <div class="image object">
+                                <img src="images/SolidworksMount1.png" alt="solidworks evebot mount" style="width:100%;" />
+                            </div>
+                            
+                            <h3>Electrical Diagrams of EASY</h3>
+                            <p>Connections of X-Axis and Z-Axis to A4998 Motor Drivers and MCU.</p>
+                            <div class="image object">
+                                <img src="images/keypad.jpg" alt="keypad" style="width:100%;" />
+                            </div>
+                        </section>
 
                         <!-- Videos -->
-                        <div class="video-container">
-                            <video width="100%" controls>
-                                <source src="singleprint1.mp4" type="video/mp4">
-                                Your browser does not support the video tag.
-                            </video>
-                        </div>
-                        <div class="video-container">
-                            <video width="100%" controls>
-                                <source src="singleprint2.mp4" type="video/mp4">
-                                Your browser does not support the video tag.
-                            </video>
-                        </div>
-                        <p>Pictured from left to right are Muslinmin, Kaushik, Reuben, Yugendren, Baker and Founder of Nicher: Melvin, and myself, Stafford.</p>
-                        <div class="image object">
-                            <img src="images/nicherssep2.jpg" alt="Nichers Collab" style="width:100%;" />
-                            <img src="images/nichersdiscussion.jpg" alt="Discussion with Chef Melvin" style="width:100%;" />
-                            <img src="images/nicherstestprint1.jpg" alt="testprint1" style="width:100%;" />
-                        </div>
-                    </section>
-
-                    <section>
-                        <h3>Prototyping & Fabrications</h3>
-                        <p>Developed 3D CAD models using SolidWorks to replicate the EVEBOT Automation solution Y (EASY).</p>
-                        <div class="image object">
-                            <img src="images/SolidworksEvebot.png" alt="SolidworksEvebot" style="width:100%;" />
-                        </div>
+                        <section>
+                            <div class="video-container">
+                                <video width="100%" controls>
+                                    <source src="multiprint1.mp4" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                            </div>
+                            <div class="video-container">
+                                <video width="100%" controls>
+                                    <source src="multiprint2.mp4" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                            </div>
+                            <div class="video-container">
+                                <video width="100%" controls>
+                                    <source src="multiprint3.mp4" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                            </div>
+                        </section>
                         
-                        <p>Utilized Arcadia and Capella Skills to model out Physical Architecture of EASY.</p>
-                        <div class="image object">
-                            <img src="images/EASYPA.jpg" alt="System Architecture" style="width:100%;" />
-                        </div>
-                        
-                        <p>Below are some of the previous iterations of EASY.</p>
-                        <!-- Videos -->
-                        <div class="video-container">
-                            <video width="100%" controls>
-                                <source src="testvideofactorycroissant.mp4" type="video/mp4">
-                                Your browser does not support the video tag.
-                            </video>
-                        </div>
-                        <div class="image object">
-                            <img src="images/system19jul24.jpg" alt="system19jul24" style="width:100%;" />
-                            <img src="images/system12jul24.jpg" alt="system12jul24" style="width:100%;" />
-                            <img src="images/system9jul24.jpg" alt="system9jul24" style="width:100%;" />
-                            <img src="images/9julcover.jpg" alt="system9jul24" style="width:100%;" />
-                        </div>
-                    </section>
+                        <!-- Stakeholder Validation -->
+                        <section>
+                            <h3>Stakeholder Validation</h3>
+                            <p>Identified Stakeholder <a href="nicher.html">Nicher</a> and discussed opportunity for the system in the croissant market.</p>
+                            <div class="image object">
+                                <img src="images/system25jul24.jpg" alt="system25jul24" style="width:100%;" />
+                                <img src="images/testprint0.jpg" alt="successful nichers print" style="width:100%;" />
+                            </div>
+                            <p>We regularly engaged with the stakeholder Nicher to explore potential opportunities for implementing our system in the croissant market. The stakeholder was enthusiastic about our proposed solution and shared our vision for its potential. Successfully printed Nicher's brand logo and the stakeholder found the results acceptable and gave feedback.</p>
+                            <div class="image object">
+                                <img src="images/SV.jpg" alt="Stakeholder Validation" style="width:100%;" />
+                                <img src="images/SAP.jpg" alt="Stakeholder Acceptable Print" style="width:100%;" />
+                            </div>
 
-                    <section>
-                        <p>Early architecture representations of Ball Point Pen solution which we later decided to terminate to explore other concepts.</p>
-                        <div class="image object">
-                            <img src="images/ballpoint.jpg" alt="ballpoint" style="width:100%;" />
-                            <img src="images/[SAB] Structure.jpg" alt="System Architecture" style="width:100%;" />
-                            <img src="images/[PAB] Structure.jpg" alt="Physical Architecture" style="width:100%;" />
-                        </div>
-                    </section>
+                            <div class="video-container">
+                                <video width="100%" controls>
+                                    <source src="singleprint1.mp4" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                            </div>
+                            <div class="video-container">
+                                <video width="100%" controls>
+                                    <source src="singleprint2.mp4" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                            </div>
+                            <p>Pictured from left to right are Muslinmin, Kaushik, Reuben, Yugendren, Baker and Founder of Nicher: Melvin, and myself, Stafford.</p>
+                            <div class="image object">
+                                <img src="images/nicherssep2.jpg" alt="Nichers Collab" style="width:100%;" />
+                                <img src="images/nichersdiscussion.jpg" alt="Discussion with Chef Melvin" style="width:100%;" />
+                                <img src="images/nicherstestprint1.jpg" alt="testprint1" style="width:100%;" />
+                            </div>
+                        </section>
+
+                        <!-- Prototyping & Fabrications -->
+                        <section>
+                            <h3>Prototyping & Fabrications</h3>
+                            <p>Developed 3D CAD models using SolidWorks to replicate the EVEBOT Automation solution Y (EASY).</p>
+                            <div class="image object">
+                                <img src="images/SolidworksEvebot.png" alt="SolidworksEvebot" style="width:100%;" />
+                            </div>
+                            
+                            <p>Utilized Arcadia and Capella Skills to model out Physical Architecture of EASY.</p>
+                            <div class="image object">
+                                <img src="images/EASYPA.jpg" alt="System Architecture" style="width:100%;" />
+                            </div>
+                            
+                            <p>Below are some of the previous iterations of EASY.</p>
+                            <div class="video-container">
+                                <video width="100%" controls>
+                                    <source src="testvideofactorycroissant.mp4" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                            </div>
+                            <div class="image object">
+                                <img src="images/system19jul24.jpg" alt="system19jul24" style="width:100%;" />
+                                <img src="images/system12jul24.jpg" alt="system12jul24" style="width:100%;" />
+                                <img src="images/system9jul24.jpg" alt="system9jul24" style="width:100%;" />
+                                <img src="images/9julcover.jpg" alt="system9jul24" style="width:100%;" />
+                            </div>
+                        </section>
+
+                        <section>
+                            <p>Early architecture representations of Ball Point Pen solution which we later decided to terminate to explore other concepts.</p>
+                            <div class="image object">
+                                <img src="images/ballpoint.jpg" alt="ballpoint" style="width:100%;" />
+                                <img src="images/[SAB] Structure.jpg" alt="System Architecture" style="width:100%;" />
+                                <img src="images/[PAB] Structure.jpg" alt="Physical Architecture" style="width:100%;" />
+                            </div>
+                        </section>
                     
                 </div>
             </div>
