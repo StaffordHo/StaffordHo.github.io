@@ -65,7 +65,44 @@
                             <h2>Systems Engineering Project 2 (SEP2) Technical Documentation</h2>
                         </header>
                         <p>Here is a database of Technical Documentation taken from Systems Engineering Project 2 focusing on Evebot Automation Solution Y (EASY)</p>
-                        <h3>Component Breakdown</h3>
+                        
+                        <!-- Documentation Section -->
+                    <section>
+                        <h3>Description</h3>
+                        <p>The system consists of key <a href="sep2doc.html#Components">components</a> reflecting functionalities such as:</p>
+                        <ul>
+                            <li>Pixy2 Camera for positional guidance</li>
+                            <li>PrintHead/X Axis Carriage for X Axis Movement</li>
+                            <li>Conveyor for Y Axis Movement</li>
+                            <li>Guiding Rod attached to printhead for Z Axis Movement</li>
+                            <li>Keypad for program control</li>
+                        </ul>
+
+                        <p>The software integrates all of the components, with the keypad being the control panel, X and Y axes fully automated with PixyCam as the main driver for positional movement, and manual/human control for the Z Axis.</p>
+
+                        <h3>Pixy Camera For Positional Guidance</h3>
+                        <p>The <code>Pixy Camera</code> interprets the conveyor belt based on image recognition. These objects are pastries, with <em>colour signature</em> boxes on them.</p>
+
+                        <div class="image-container">
+                            <img src="https://github.com/user-attachments/assets/bd544ce3-9286-47e4-9e27-31b1b18a1eff" alt="Image" />
+                        </div>
+
+                        <p>The Pixy camera has two lines to create a <em>row</em> of objects along the X-axis.</p>
+
+                        <div class="image-container">
+                            <img src="https://github.com/user-attachments/assets/28489d34-fe56-4523-99c5-2de9eea9a570" alt="Image" />
+                        </div>
+
+                        <h4>Row Object</h4>
+                        <h5>Creating a Row Reference Point</h5>
+                        <p>To guide X and Y Axes to move and print on the correct pastries, the program creates a <code>Row</code>, which consists of x coordinates of pastries along the same row, a y coordinate <code>coordRow_Y</code> serving as a reference point to bring the <code>Row</code> to the <em>PRINTLINE</em>, and the number of pastries/objects in the <code>Row</code>.</p>
+
+                        <pre><code>typedef struct __row{
+    uint16_t coordRow_Y;
+    uint16_t numberOfRowObjects;
+    uint16_t coordXArray[10];
+} Row;</code></pre>
+                        <h3>Components</h3>
                         <p>Isometric view of EASY as a whole.</p>
                         <div class="image object">
                             <img src="images/EASY.jpg" alt="EASY" style="width:100%;" />
