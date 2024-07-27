@@ -76,13 +76,13 @@
                             <p>The <code>Pixy2 Camera</code> interprets the conveyor belt based on image recognition. These objects are artisanal pastries, with <em>colour signature</em> boxes on them. Based on the axes, towards the right, the x value increases. As you go down, the y value increases.</p>
 
                             <div class="image-container">
-                                <img src="pg.png" alt="Positional Guidance" />
+                                <img src="images/pg.png" alt="Positional Guidance" style="width:100%;" />
                             </div>
 
                             <p>The Pixy camera has two lines to create a <em>row</em> of objects along the X-axis.</p>
 
                             <div class="image-container">
-                                <img src="ro.png" alt="Row Object" />
+                                <img src="images/ro.png" alt="Row Object" style="width:100%;" />
                             </div>
 
                             <h4>Row Object</h4>
@@ -114,13 +114,13 @@
                             <p>The <strong>second condition</strong> dictates that the pastry selected as the reference for the <code>Row</code> must have its bottom width <strong>before</strong> the <em>PRINT_LINE</em> + 10 pixels line.</p>
 
                             <div class="image-container">
-                                <img src="cp.png" alt="Centrepoint" />
+                                <img src="images/cp.png" alt="Centrepoint" style="width:100%;" />
                             </div>
 
                             <p>The image above describes a row being created because it <strong>meets the two conditions mentioned</strong>.</p>
 
                             <div class="image-container">
-                                <img src="pl.png" alt="Printline" />
+                                <img src="images/pl.png" alt="Printline" style="width:100%;" />
                             </div>
 
                             <p>The image above shows that <strong>no row is created</strong> because it <strong>does not meet the second condition</strong>.</p>
@@ -142,7 +142,7 @@
 }</code></pre>
 
                             <div class="image-container">
-                                <img src="cppl.png" alt="centrepoint within printline" />
+                                <img src="images/cppl.png" alt="centrepoint within printline" style="width:100%;" />
                             </div>
 
                             <p>Hence, a row is created with the <code>Row.coordXArray[]</code> <strong>filled with the centre points of pastries along the x axis</strong>.</p>
@@ -171,7 +171,7 @@
                             <p>The diagram below illustrates this function.</p>
                             
                             <div class="image-container">
-                                <img src="Xmove.png" alt="XAxis move" />
+                                <img src="images/Xmove.png" alt="XAxis move" style="width:100%;" />
                             </div>
 
                             <p><code>iniDelay()</code></p>
@@ -179,7 +179,7 @@
                             <p>Once arrived at the location within an offset from the centre point of the pastry, the program commences <code>iniDelay()</code>. <code>iniDelay()</code> covers the distance gap EveBot is required to roll before actual printing commences. The distance gap was measured from the EveBot ruler illustrated below.</p>
 
                             <div class="image-container">
-                                <img src="Xbuffer.png" alt="buffer for print" />
+                                <img src="images/Xbuffer.png" alt="buffer for print" style="width:100%;" />
                             </div>
 
                             <p><code>xAxisMovement(PRINTSIZE)</code></p>
@@ -187,7 +187,7 @@
                             <p>The printhead then moves according to the PRINTSIZE specified by the user via the <strong>keypad interface</strong>. The default value for <code>PRINTSIZE</code> is 43.</p>
 
                             <div class="image-container">
-                                <img src="Xprint.png" alt="print proper" />
+                                <img src="images/Xprint.png" alt="print proper" style="width:100%;" />
                             </div>
 
                             <p><code>backToHomePosition()</code></p>
@@ -195,7 +195,7 @@
                             <p>This function moves the printhead back to the HOME position, i.e., until it hits the limit switch at HOME. Within this function, the program sends <strong>HIGH</strong> and <strong>LOW</strong> pulses until the limit switch toggles. The following diagram illustrates this:</p>
 
                             <div class="image-container">
-                                <img src="Xhome.png" alt="Image" />
+                                <img src="images/Xhome.png" alt="Image" style="width:100%;" />
                             </div>
 
                             <p><code>pressEveBot()</code></p>
@@ -253,7 +253,7 @@ HAL_Delay(500);</code></pre>
 }</code></pre>
 
                             <div class="image-container">
-                                <img src="Xref.png" alt="pixy reference point" />
+                                <img src="images/Xref.png" alt="pixy reference point" style="width:100%;" />
                             </div>
 
                             <h3>Z Axis Print Head Movement</h3>
@@ -289,11 +289,11 @@ HAL_Delay(500);</code></pre>
                             <h3>Final Overview of the X Axis and Y Axis PrintHead and Conveyor Movement Routine (Flow Chart)</h3>
 
                             <div class="image-container">
-                                <img src="Xflow.png" alt="X Flow Chart" />
+                                <img src="images/Xflow.png" alt="X Flow Chart" style="width:100%;" />
                             </div>
 
                             <div class="image-container">
-                                <img src="Yflow.png" alt="Y Flow Chart" />
+                                <img src="images/Yflow.png" alt="Y Flow Chart" style="width:100%;" />
                             </div>
                         </section>
 
