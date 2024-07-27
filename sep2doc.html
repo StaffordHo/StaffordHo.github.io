@@ -84,13 +84,13 @@
                         <p>The <code>Pixy2 Camera</code> interprets the conveyor belt based on image recognition. These objects are artisanal pastries, with <em>colour signature</em> boxes on them. Based on the axes, towards the right, the x value increases. As you go down, the y value increases.</p>
 
                         <div class="image-container">
-                            <img src="https://github.com/user-attachments/assets/bd544ce3-9286-47e4-9e27-31b1b18a1eff" alt="Image" />
+                            <img src="pg.png" alt="Positional Guidance" />
                         </div>
 
                         <p>The Pixy camera has two lines to create a <em>row</em> of objects along the X-axis.</p>
 
                         <div class="image-container">
-                            <img src="https://github.com/user-attachments/assets/28489d34-fe56-4523-99c5-2de9eea9a570" alt="Image" />
+                            <img src="ro.png" alt="Row Object" />
                         </div>
 
                         <h4>Row Object</h4>
@@ -122,13 +122,13 @@
                         <p>The <strong>second condition</strong> dictates that the pastry selected as the reference for the <code>Row</code> must have its bottom width <strong>before</strong> the <em>PRINT_LINE</em> + 10 pixels line.</p>
 
                         <div class="image-container">
-                            <img src="https://github.com/user-attachments/assets/3d105be6-bf91-4f05-8790-1a99ae46733b" alt="Image" />
+                            <img src="cp.png" alt="Centrepoint" />
                         </div>
 
                         <p>The image above describes a row being created because it <strong>meets the two conditions mentioned</strong>.</p>
 
                         <div class="image-container">
-                            <img src="https://github.com/user-attachments/assets/b0bcb62c-8961-493a-af73-fce657c0e12b" alt="Image" />
+                            <img src="pl.png" alt="Printline" />
                         </div>
 
                         <p>The image above shows that <strong>no row is created</strong> because it <strong>does not meet the second condition</strong>.</p>
@@ -150,7 +150,7 @@
 }</code></pre>
 
                         <div class="image-container">
-                            <img src="https://github.com/user-attachments/assets/046f05f3-0cde-4423-9ccf-0cb6a21168b1" alt="Image" />
+                            <img src="cppl.png" alt="centrepoint within printline" />
                         </div>
 
                         <p>Hence, a row is created with the <code>Row.coordXArray[]</code> <strong>filled with the centre points of pastries along the x axis</strong>.</p>
@@ -176,8 +176,10 @@
 
                         <p>The <code>xAxisMovement((row.coordXArray[i] - datum) * PIXY_RATIO)</code> moves the printhead to the centre points of pastries, starting with the first pastry. The <code>datum</code> is a preset value that offsets the printhead from the centre point of a pastry. <code>PIXY_RATIO</code> is a ratio used to convert the <strong>number of pixels</strong> from <code>(row.coordXArray[i] - datum)</code> into distance (mm).</p>
 
+                        <p>The diagram below illustrates this function.</p>
+                        
                         <div class="image-container">
-                            <img src="https://github.com/user-attachments/assets/b557da16-8e1d-4f7b-ba70-d70d0010371d" alt="Image" />
+                            <img src="Xmove.png" alt="XAxis move" />
                         </div>
 
                         <p><code>iniDelay()</code></p>
@@ -185,7 +187,7 @@
                         <p>Once arrived at the location within an offset from the centre point of the pastry, the program commences <code>iniDelay()</code>. <code>iniDelay()</code> covers the distance gap EveBot is required to roll before actual printing commences. The distance gap was measured from the EveBot ruler illustrated below.</p>
 
                         <div class="image-container">
-                            <img src="https://github.com/user-attachments/assets/09bf2aea-fd86-43e3-bcc7-4227ca1040fb" alt="Image" />
+                            <img src="Xbuffer.png" alt="buffer for print" />
                         </div>
 
                         <p><code>xAxisMovement(PRINTSIZE)</code></p>
@@ -193,7 +195,7 @@
                         <p>The printhead then moves according to the PRINTSIZE specified by the user via the <strong>keypad interface</strong>. The default value for <code>PRINTSIZE</code> is 43.</p>
 
                         <div class="image-container">
-                            <img src="https://github.com/user-attachments/assets/75560c5b-b7f5-457a-84ca-2ebc1df672f0" alt="Image" />
+                            <img src="Xprint.png" alt="print proper" />
                         </div>
 
                         <p><code>backToHomePosition()</code></p>
@@ -201,7 +203,7 @@
                         <p>This function moves the printhead back to the HOME position, i.e., until it hits the limit switch at HOME. Within this function, the program sends <strong>HIGH</strong> and <strong>LOW</strong> pulses until the limit switch toggles. The following diagram illustrates this:</p>
 
                         <div class="image-container">
-                            <img src="https://github.com/user-attachments/assets/65b69bdd-a2d8-498a-bf1a-959c94c0d5e4" alt="Image" />
+                            <img src="Xhome.png" alt="Image" />
                         </div>
 
                         <p><code>pressEveBot()</code></p>
@@ -259,7 +261,7 @@ HAL_Delay(500);</code></pre>
 }</code></pre>
 
                         <div class="image-container">
-                            <img src="https://github.com/user-attachments/assets/9385b23c-a41c-487c-a324-9f9cae496d1e" alt="Image" />
+                            <img src="Xref.png" alt="pixy reference point" />
                         </div>
 
                         <h3>Z Axis Print Head Movement</h3>
@@ -295,11 +297,11 @@ HAL_Delay(500);</code></pre>
                         <h3>Final Overview of the X Axis and Y Axis PrintHead and Conveyor Movement Routine (Flow Chart)</h3>
 
                         <div class="image-container">
-                            <img src="https://github.com/user-attachments/assets/0ab22698-b60b-439c-8399-0b588207aeb3" alt="Flow Chart" />
+                            <img src="Xflow.png" alt="X Flow Chart" />
                         </div>
 
                         <div class="image-container">
-                            <img src="https://github.com/user-attachments/assets/fa0682cc-7a3a-4d1d-9bf0-75fd7f4fd938" alt="Flow Chart" />
+                            <img src="Yflow.png" alt="Y Flow Chart" />
                         </div>
                     </section>
                 </div>
