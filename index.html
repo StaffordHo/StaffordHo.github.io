@@ -10,6 +10,65 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="assets/css/main.css" />
+		<style>
+			/* Additional styles for improved UI/UX */
+			body {
+				font-family: Arial, sans-serif;
+				color: #333;
+			}
+			#banner .content {
+				max-width: 800px;
+				margin: 0 auto;
+				text-align: center;
+			}
+			.button {
+				background-color: #0066cc;
+				color: white;
+				padding: 10px 20px;
+				text-decoration: none;
+				border-radius: 5px;
+				transition: background-color 0.3s;
+			}
+			.button:hover {
+				background-color: #005bb5;
+			}
+			#topButton {
+				display: none; /* Hidden by default */
+				position: fixed; /* Fixed position */
+				bottom: 20px; /* Place the button 20px from the bottom */
+				right: 30px; /* Place the button 30px from the right */
+				z-index: 99; /* Make sure it does not overlap */
+				border: none; /* Remove borders */
+				outline: none; /* Remove outline */
+				background-color: #000; /* Set background color */
+				color: white; /* Set text color */
+				cursor: pointer; /* Add a pointer on hover */
+				padding: 15px; /* Some padding */
+				border-radius: 10px; /* Rounded corners */
+				font-size: 16px; /* Set font size */
+				line-height: normal; /* Set line height */
+				text-align: center; /* Center the text */
+				vertical-align: middle; /* Center vertically */
+			}
+			#topButton:hover {
+				background-color: #555; /* Add a dark-grey background on hover */
+			}
+			/* Media queries for responsive design */
+			@media (max-width: 768px) {
+				#banner .content {
+					padding: 20px;
+				}
+				.features {
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+				}
+				.features article {
+					width: 100%;
+					margin-bottom: 20px;
+				}
+			}
+		</style>
 	</head>
 	<body class="is-preload">
 
@@ -26,8 +85,8 @@
 									<ul class="icons">
 										<li><a href="https://github.com/StaffordHo" class="icon brands fa-github"><span class="label">Github</span></a></li>
 										<li><a href="https://www.linkedin.com/in/stafford-ho/" class="icon brands fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
-										<li><a href="index.html#projects" class="icon solid fa-folder"><span class="label">Projects</span><span class="text">Projects</span></a></li>
-                            							<li><a href="resume.pdf" class="icon solid fa-file-alt" target="_blank"><span class="label">Resume</span><span class="text">Resume</span></a></li>
+										<li><a href="index.html#projects" class="icon solid fa-folder"><span class="label">Projects</span></a></li>
+                            							<li><a href="resume.pdf" class="icon solid fa-file-alt" target="_blank"><span class="label">Resume</span></a></li>
 									</ul>
 								</header>
 
@@ -35,8 +94,7 @@
 								<section id="banner">
 									<div class="content">
 										<header>
-											<h1>Stafford Ho Sheng Xian<br />
-											</h1>
+											<h1>Stafford Ho Sheng Xian</h1>
 											<p>Robotics Systems Engineering Undergraduate</p>
 										</header>
 										<p>I am a driven and ambitious student in my second year of studies in Singapore Institute of Technology (SIT), taking a Bachelor of Engineering with Honours in Robotics Systems. I take pride in taking charge of projects in school and leading my team toward producing results.</p>
@@ -45,7 +103,7 @@
 										</ul>
 									</div>
 									<span class="image object">
-										<img src="images/pic0.jpg" alt="" />
+										<img src="images/pic0.jpg" alt="Stafford Ho Sheng Xian" />
 									</span>
 								</section>
 
@@ -93,7 +151,7 @@
 									</header>
 									<div class="posts">
 										<article>
-                                                                                        <a href="systems-engineering-project-2.html" class="image"><img src="images/system25jul24.jpg" alt="" /></a>
+                                                                                        <a href="systems-engineering-project-2.html" class="image"><img src="images/system25jul24.jpg" alt="Systems Engineering Project 2" /></a>
                                                                                         <h3>Systems Engineering Project 2 (SEP2) (Ongoing)</h3>
                                                                                         <p>Define an Innovative Food Printing system using a Systems approach. The formal application of Systems Engineering Concepts & Principles based on 15288 Processes</p>
                                                                                         <ul class="actions">
@@ -101,7 +159,7 @@
                                                                                         </ul>
                                                                                 </article>
 										<article>
-                                                                                        <a href="ude.html" class="image"><img src="images/roots&routestop.jpg" alt="" /></a>
+                                                                                        <a href="ude.html" class="image"><img src="images/roots&routestop.jpg" alt="Interdisciplinary Design Innovation" /></a>
                                                                                         <h3>Interdisciplinary Design Innovation</h3>
                                                                                         <p>Collaborated with SIT Accountancy undergraduates to address a problem statement under KPMG Theme: "Promote an inclusive working culture."</p>
                                                                                         <ul class="actions">
@@ -109,7 +167,7 @@
                                                                                         </ul>
                                                                                 </article>
 										<article>
-											<a href="#" class="image"><img src="images/latentpoint.jpg" alt="" /></a>
+											<a href="project-4.html" class="image"><img src="images/latentpoint.jpg" alt="Project 4" /></a>
 											<h3>Project 4</h3>
 											<p>Collaborated with industry partner Bolloré Logistics in line with academic project: Project 4 to tackle problem statement: "Simulate assembly line automation. Using robotics and machines, the students can also model out before and after automation to show the productivity improvement and reduction of reliance on human resources."</p>
 											<ul class="actions">
@@ -117,7 +175,7 @@
 											</ul>
 										</article>
 										<article>
-											<a href="#" class="image"><img src="images/maze.jpg" alt="" /></a>
+											<a href="project-3.html" class="image"><img src="images/maze.jpg" alt="Project 3" /></a>
 											<h3>Project 3</h3>
 											<p>Develop Project Management Skills with reference to Project Management Body of Knowledge (PMBoK) and design a maze-solving algorithm with the use of Robot Operating System 2 (ROS2) Framework without any hardware.</p>
 											<ul class="actions">
@@ -125,15 +183,15 @@
 											</ul>
 										</article>
 										<article>
-											<a href="#" class="image"><img src="images/uss2.jpg" alt="" /></a>
-											<h3>Systems Engineering Project 1 (SEP1) </h3>
+											<a href="systems-engineering-project-1.html" class="image"><img src="images/uss2.jpg" alt="Systems Engineering Project 1" /></a>
+											<h3>Systems Engineering Project 1 (SEP1)</h3>
 											<p>Fabricate a landmark of Singapore and design a maze-solving algorithm with the use of Robot Operating System (ROS) Framework that can be implemented on AgileX LIMO, the Robotics Systems Platform given.</p>
 											<ul class="actions">
 												<li><a href="systems-engineering-project-1.html" class="button">Learn More</a></li>
 											</ul>
 										</article>
 										<article>
-											<a href="#" class="image"><img src="images/litepro.jpg" alt="" /></a>
+											<a href="project-2.html" class="image"><img src="images/litepro.jpg" alt="Project 2" /></a>
 											<h3>Project 2</h3>
 											<p>Design and fabricate a torchlight holder that is able rotate on the X-axis and switch on the torchlight. Build upon Project 1: Design a Object-Oriented Colour-Tracking code and develop Embedded Systems foundation with the use of hardware and software to enable wireless communication with each other: Parallax Propellor Board, STM32 Board, RoboClaw, Pixy Cam, Ultrasonic sensors, Tof sensors and Mecanum Wheels.</p>
 											<ul class="actions">
@@ -141,7 +199,7 @@
 											</ul>
 										</article>
 										<article>
-											<a href="#" class="image"><img src="images/productionkit.jpg" alt="" /></a>
+											<a href="project-1.html" class="image"><img src="images/productionkit.jpg" alt="Project 1" /></a>
 											<h3>Project 1</h3>
 											<p>Develop foundational Mechanical, Electrical and Software skills: Using a given Robotics Platform, demonstrate Obstacle Avoidance Capabilities to get to a target destination with the use of Ultrasonic sensors and Tof sensors.</p>
 											<ul class="actions">
