@@ -79,7 +79,7 @@
                                 <img src="images/pg.png" alt="Positional Guidance" style="width:100%;" />
                             </div>
 
-                            <p>The Pixy camera has two lines to create a <em>row</em> of objects along the X-axis.</p>
+                            <p>The Pixy camera has two lines to create a <em>row</em> of objects along the X-Axis.</p>
 
                             <div class="image-container">
                                 <img src="images/ro.png" alt="Row Object" style="width:100%;" />
@@ -109,7 +109,7 @@
     }
 }</code></pre>
 
-                            <p>The program first finds the pastry closest to the <em>PRINTLINE</em>, i.e., the bottommost pastry along the Y Axis, by looking at the <em>centre points</em> of these pastries. The bottommost pastry is selected at the end of the <strong>for loop</strong>. This is the program's <strong>first condition</strong>.</p>
+                            <p>The program first finds the pastry closest to the <em>PRINTLINE</em>, i.e., the bottommost pastry along the Y-Axis, by looking at the <em>centre points</em> of these pastries. The bottommost pastry is selected at the end of the <strong>for loop</strong>. This is the program's <strong>first condition</strong>.</p>
 
                             <p>The <strong>second condition</strong> dictates that the pastry selected as the reference for the <code>Row</code> must have its bottom width <strong>before</strong> the <em>PRINT_LINE</em> + 10 pixels line.</p>
 
@@ -126,9 +126,9 @@
                             <p>The image above shows that <strong>no row is created</strong> because it <strong>does not meet the second condition</strong>.</p>
 
                             <h5>Adding Pastries to the Row Object</h5>
-                            <p>Once the <code>Row</code> reference point is selected, i.e., closest to the <em>PRINT_LINE</em>, the program now adds other pastries along the Y axis within a set buffer.</p>
+                            <p>Once the <code>Row</code> reference point is selected, i.e., closest to the <em>PRINT_LINE</em>, the program now adds other pastries along the Y-Axis within a set buffer.</p>
 
-                            <p>Taking <code>Row.coordRow_Y</code>, which was set as a reference point along the Y axis, i.e., conveyor, the program looks for pastries with centre points within <code>Row.coordRow_Y</code> and <code>Row.coordRow_Y - 10</code>. The snippet describes this pastry selection for the <code>Row</code> object.</p>
+                            <p>Taking <code>Row.coordRow_Y</code>, which was set as a reference point along the Y-Axis, i.e., conveyor, the program looks for pastries with centre points within <code>Row.coordRow_Y</code> and <code>Row.coordRow_Y - 10</code>. The snippet describes this pastry selection for the <code>Row</code> object.</p>
 
                             <pre><code>for(int i = 0; i < numberOfBlocks; ++i) // loop for the no objects
 {
@@ -145,15 +145,15 @@
                                 <img src="images/cppl.png" alt="centrepoint within printline" style="width:100%;" />
                             </div>
 
-                            <p>Hence, a row is created with the <code>Row.coordXArray[]</code> <strong>filled with the centre points of pastries along the x axis</strong>.</p>
+                            <p>Hence, a row is created with the <code>Row.coordXArray[]</code> <strong>filled with the centre points of pastries along the X-Axis</strong>.</p>
 
                             <h5>Sorting the Row.coordXArray[]</h5>
                             <p>The row of x coordinates is sorted from smallest (closest to the origin or printhead) to the largest. This ensures that the printhead goes in proper sequence from left to right.</p>
 
                             <pre><code>bubbleSort(row.coordXArray, 10);</code></pre>
 
-                            <h3>X Axis Print Head Movement</h3>
-                            <p>The X Axis Movement has the following <strong>key</strong> functions to guide the printhead to locations where the pastry is placed based on the pixy camera.</p>
+                            <h3>X-Axis Print Head Movement</h3>
+                            <p>The X-Axis Movement has the following <strong>key</strong> functions to guide the printhead to locations where the pastry is placed based on the pixy camera.</p>
 
                             <ul>
                                 <li><code>printHeadMovementRoutine_AUTO()</code></li>
@@ -205,7 +205,7 @@
                             <h4>More information about the Helper Functions</h4>
                             <p><code>xAxisMovement(int distance)</code></p>
 
-                            <p>The function converts the argument that the program assumes into <strong>steps</strong> for the stepper motor. The <strong>steps</strong> are for loop iterations, which sends <strong>HIGH</strong> and <strong>LOW</strong> pulses in <strong>alternating and fixed microseconds interval</strong> to the motor driver. This routine is similar to conveyor stepper motor and z-axis stepper motor movement, except with differing values. The following code below showcases this:</p>
+                            <p>The function converts the argument that the program assumes into <strong>steps</strong> for the stepper motor. The <strong>steps</strong> are for loop iterations, which sends <strong>HIGH</strong> and <strong>LOW</strong> pulses in <strong>alternating and fixed microseconds interval</strong> to the motor driver. This routine is similar to conveyor stepper motor and Z-Axis stepper motor movement, except with differing values. The following code below showcases this:</p>
 
                             <pre><code>void xAxisMovement(int distance){
     int dist = distCal(distance);
@@ -230,8 +230,8 @@ HAL_Delay(500);</code></pre>
 
                             <p>The <code>__HAL_TIM_SET_COMPARE()</code> describes <code>TIM3</code> being used, while the third parameter is the <strong>duty cycle</strong> you would like to set. Since the counter period is set to 1000 on the STM, <code>RETRACT_PEN_UP</code> and <code>EXTEND_PEN_DOWN</code> are given values of <strong>200</strong> and <strong>336</strong> respectively. That means divided by the counter period, <strong>duty cycles are 20% and 36% respectively</strong>.</p>
 
-                            <h3>Y Axis Print Head Movement</h3>
-                            <p>The Y Axis Movement has the following <strong>key</strong> functions to guide and move the conveyor belt to move the tray of pastries along the Y axis.</p>
+                            <h3>Y-Axis Print Head Movement</h3>
+                            <p>The Y-Axis Movement has the following <strong>key</strong> functions to guide and move the conveyor belt to move the tray of pastries along the Y-Axis.</p>
 
                             <ul>
                                 <li><code>conveyorMovement(int z)</code></li>
@@ -256,8 +256,8 @@ HAL_Delay(500);</code></pre>
                                 <img src="images/Xref.png" alt="pixy reference point" style="width:100%;" />
                             </div>
 
-                            <h3>Z Axis Print Head Movement</h3>
-                            <p>The Z Axis Movement moves the print carriage vertically (upwards or downwards). The diagram below shows where the z-axis stepper motor and guiding rod is at:</p>
+                            <h3>Z-Axis Print Head Movement</h3>
+                            <p>The Z-Axis Movement moves the print carriage vertically (upwards or downwards). The diagram below shows where the Z-Axis stepper motor and guiding rod is at:</p>
 
                             <ul>
                                 <li><code>void moveZAxisUp()</code></li>
@@ -286,7 +286,7 @@ HAL_Delay(500);</code></pre>
     microDelay(conveyorStepperDelay);
 }</code></pre>
 
-                            <h3>Final Overview of the X Axis and Y Axis PrintHead and Conveyor Movement Routine (Flow Chart)</h3>
+                            <h3>Final Overview of the X-Axis and Y-Axis PrintHead and Conveyor Movement Routine (Flow Chart)</h3>
 
                             <div class="image-container">
                                 <img src="images/Xflow.png" alt="X Flow Chart" style="width:100%;" />
@@ -324,7 +324,7 @@ HAL_Delay(500);</code></pre>
                             <div class="image object">
                                 <img src="images/reset.jpg" alt="reset" style="width:100%;" />
                             </div>
-                            <p>4x4 Keypad for adjusting Z-axis to fit height of object being printed on.</p>
+                            <p>4x4 Keypad for adjusting Z-Axis to fit height of object being printed on.</p>
                             <div class="image object">
                                 <img src="images/keypad.jpg" alt="keypad" style="width:100%;" />
                             </div>
