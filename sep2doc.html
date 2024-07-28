@@ -73,7 +73,7 @@
                             <p>The software integrates all of the components, with the keypad being the control panel, X and Y axes fully automated with PixyCam as the main driver for positional movement, and manual/human control for the Z-Axis.</p>
 
                             <h3>Pixy2 Camera For Positional Guidance</h3>
-                            <p>The <code>Pixy2 Camera</code> interprets the conveyor belt based on image recognition. These objects are artisanal pastries, with <em>colour signature</em> boxes on them. Based on the axes, towards the right, the x value increases. As you go down, the y value increases.</p>
+                            <p>The <code>Pixy2 Camera</code> interprets the conveyor belt based on image recognition. These objects are artisanal pastries, with <em>colour signature</em> boxes on them. Based on the axes, towards the right, the X value increases. As you go down, the Y value increases.</p>
 
                             <div class="image-container">
                                 <img src="images/pg.png" alt="Positional Guidance" style="width:100%;" />
@@ -87,7 +87,7 @@
 
                             <h4>Row Object</h4>
                             <h5>Creating a Row Reference Point</h5>
-                            <p>To guide X and Y Axes to move and print on the correct pastries, the program creates a <code>Row</code>, which consists of x coordinates of pastries along the same row, a y coordinate <code>coordRow_Y</code> serving as a reference point to bring the <code>Row</code> to the <em>PRINTLINE</em>, and the number of pastries/objects in the <code>Row</code>.</p>
+                            <p>To guide X and Y Axes to move and print on the correct pastries, the program creates a <code>Row</code>, which consists of X coordinates of pastries along the same row, a Y coordinate <code>coordRow_Y</code> serving as a reference point to bring the <code>Row</code> to the <em>PRINTLINE</em>, and the number of pastries/objects in the <code>Row</code>.</p>
 
                             <pre><code>typedef struct __row{
     uint16_t coordRow_Y;
@@ -148,7 +148,7 @@
                             <p>Hence, a row is created with the <code>Row.coordXArray[]</code> <strong>filled with the centre points of pastries along the X-Axis</strong>.</p>
 
                             <h5>Sorting the Row.coordXArray[]</h5>
-                            <p>The row of x coordinates is sorted from smallest (closest to the origin or printhead) to the largest. This ensures that the printhead goes in proper sequence from left to right.</p>
+                            <p>The row of X coordinates is sorted from smallest (closest to the origin or printhead) to the largest. This ensures that the printhead goes in proper sequence from left to right.</p>
 
                             <pre><code>bubbleSort(row.coordXArray, 10);</code></pre>
 
@@ -176,7 +176,7 @@
 
                             <p><code>iniDelay()</code></p>
 
-                            <p>Once arrived at the location within an offset from the centre point of the pastry, the program commences <code>iniDelay()</code>. <code>iniDelay()</code> covers the distance gap EveBot is required to roll before actual printing commences. The distance gap was measured from the EveBot ruler illustrated below.</p>
+                            <p>Once arrived at the location within an offset from the centre point of the pastry, the program commences <code>iniDelay()</code>. <code>iniDelay()</code> covers the distance gap EVEBOT is required to roll before actual printing commences. The distance gap was measured from the EVEBOT ruler illustrated below.</p>
 
                             <div class="image-container">
                                 <img src="images/Xbuffer.png" alt="buffer for print" style="width:100%;" />
