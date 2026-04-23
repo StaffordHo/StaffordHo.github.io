@@ -1,0 +1,232 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>Drone Pipeline Technical Documentation</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+        <link rel="stylesheet" href="assets/css/main.css" />
+        <style>
+            .major h2, .major h3 { border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+            .video-container, .image.object { margin-bottom: 30px; }
+            #topButton { display: none; position: fixed; bottom: 20px; right: 30px; z-index: 99; border: none; outline: none; background-color: #000; color: white; cursor: pointer; padding: 15px; border-radius: 10px; font-size: 16px; line-height: normal; text-align: center; vertical-align: middle; }
+            #topButton:hover { background-color: #555; }
+        </style>
+    </head>
+    <body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="index.html" class="logo"><strong>Stafford Ho Sheng Xian</strong></a>
+                        <ul class="icons">
+                            <li><a href="https://github.com/StaffordHo" class="icon brands fa-github"><span class="label">Github</span></a></li>
+                            <li><a href="https://www.linkedin.com/in/stafford-ho/" class="icon brands fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
+                            <li><a href="index.html#projects" class="icon solid fa-folder"><span class="label">Projects</span><span class="text">Projects</span></a></li>
+                            <li><a href="resume.pdf" class="icon solid fa-file-alt" target="_blank"><span class="label">Resume</span><span class="text">Resume</span></a></li>
+                        </ul>
+                    </header>
+
+                    <section>
+                        <header class="major">
+                            <h2>CV-RL Autonomous Drone Pipeline &mdash; Technical Documentation</h2>
+                        </header>
+                        <p>Technical details of the <a href="drone-pipeline.html">Teleop &rarr; Behaviour Cloning &rarr; PPO</a> pipeline for autonomous quadrotor navigation in NVIDIA Isaac Sim.</p>
+
+                        <section>
+                            <h3>1. Environment Architecture</h3>
+                            <p>The custom Gymnasium environment wraps NVIDIA Isaac Sim + OmniDrones to provide a standard RL interface:</p>
+
+                            <pre><code>import gymnasium as gym
+from omni.isaac.kit import SimulationApp
+
+class DroneNavEnv(gym.Env):
+    """Custom Gymnasium environment for quadrotor navigation."""
+    
+    def __init__(self, config):
+        super().__init__()
+        self.observation_space = gym.spaces.Box(
+            low=-np.inf, high=np.inf, 
+            shape=(obs_dim,), dtype=np.float32
+        )
+        self.action_space = gym.spaces.Box(
+            low=-1.0, high=1.0, 
+            shape=(4,), dtype=np.float32  # thrust + 3-axis torque
+        )
+        self.max_episode_steps = 1000
+        self.collision_threshold = 0.3  # metres
+    
+    def reset(self, seed=None):
+        # Randomize obstacle positions for domain randomization
+        self._randomize_obstacles()
+        # Reset drone to random start position
+        self._reset_drone()
+        return self._get_obs(), {}
+    
+    def step(self, action):
+        self._apply_action(action)
+        self.sim.step()
+        
+        obs = self._get_obs()
+        reward = self._compute_reward()
+        terminated = self._check_collision()
+        truncated = self.step_count >= self.max_episode_steps
+        
+        return obs, reward, terminated, truncated, {}</code></pre>
+
+                            <h4>Observation Space</h4>
+                            <ul>
+                                <li><strong>Position:</strong> (x, y, z) in world frame</li>
+                                <li><strong>Velocity:</strong> (vx, vy, vz) linear velocity</li>
+                                <li><strong>Orientation:</strong> quaternion (qw, qx, qy, qz)</li>
+                                <li><strong>Angular velocity:</strong> (wx, wy, wz)</li>
+                                <li><strong>Obstacle distances:</strong> raycast readings to nearby obstacles</li>
+                            </ul>
+
+                            <h4>Action Space</h4>
+                            <p>Continuous 4D action: collective thrust + 3-axis torque commands, normalized to [-1, 1].</p>
+
+                            <h3>2. Stage 1 &mdash; Teleoperation &amp; Data Collection</h3>
+                            <p>Expert demonstrations are collected via keyboard/gamepad teleoperation. Each trajectory is stored as a sequence of (observation, action) pairs:</p>
+                            <pre><code>class DemoCollector:
+    def __init__(self, env):
+        self.env = env
+        self.demonstrations = []
+    
+    def collect_episode(self):
+        obs, _ = self.env.reset()
+        trajectory = []
+        
+        while True:
+            action = self._get_teleop_input()
+            next_obs, reward, term, trunc, info = self.env.step(action)
+            trajectory.append({
+                'obs': obs, 'action': action,
+                'reward': reward, 'next_obs': next_obs
+            })
+            obs = next_obs
+            if term or trunc:
+                break
+        
+        self.demonstrations.append(trajectory)</code></pre>
+
+                            <h3>3. Stage 2 &mdash; Behaviour Cloning</h3>
+                            <p>The collected demonstrations train an initial policy via supervised learning (imitation):</p>
+                            <pre><code>from torch.utils.data import DataLoader
+
+# Dataset: (observation, expert_action) pairs
+dataset = DemoDataset(demonstrations)
+loader = DataLoader(dataset, batch_size=64, shuffle=True)
+
+policy = PolicyNetwork(obs_dim, action_dim)
+optimizer = torch.optim.Adam(policy.parameters(), lr=3e-4)
+
+for epoch in range(num_epochs):
+    for obs_batch, action_batch in loader:
+        pred_actions = policy(obs_batch)
+        loss = F.mse_loss(pred_actions, action_batch)
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()</code></pre>
+                            <p>This produces a warm-start policy that demonstrates basic navigation competence, providing a much better starting point than random initialization for the RL phase.</p>
+
+                            <h3>4. Stage 3 &mdash; PPO Fine-Tuning</h3>
+                            <p>The behaviour-cloned policy is loaded into <strong>Stable-Baselines3</strong> and fine-tuned using PPO:</p>
+                            <pre><code>from stable_baselines3 import PPO
+
+# Load BC-pretrained policy as starting point
+model = PPO(
+    "MlpPolicy", env,
+    learning_rate=3e-4,
+    n_steps=2048,
+    batch_size=64,
+    n_epochs=10,
+    gamma=0.99,
+    gae_lambda=0.95,
+    clip_range=0.2,
+    verbose=1,
+    tensorboard_log="./ppo_drone_logs/"
+)
+
+# Load pretrained BC weights
+model.policy.load_state_dict(bc_policy_state_dict)
+
+# Train with PPO
+model.learn(total_timesteps=500_000)</code></pre>
+
+                            <h4>Reward Function</h4>
+                            <pre><code>def _compute_reward(self):
+    # Progress toward goal
+    dist_to_goal = np.linalg.norm(self.drone_pos - self.goal_pos)
+    progress_reward = self.prev_dist - dist_to_goal
+    
+    # Collision penalty
+    collision_penalty = -10.0 if self._check_collision() else 0.0
+    
+    # Efficiency bonus (penalize excessive energy use)
+    energy_penalty = -0.01 * np.sum(np.abs(self.current_action))
+    
+    # Goal reached bonus
+    goal_bonus = 100.0 if dist_to_goal < 0.5 else 0.0
+    
+    self.prev_dist = dist_to_goal
+    return progress_reward + collision_penalty + energy_penalty + goal_bonus</code></pre>
+
+                            <h3>5. Domain Randomization</h3>
+                            <p>To improve generalization, obstacles are randomized each episode:</p>
+                            <ul>
+                                <li><strong>Position:</strong> Uniform sampling within arena bounds</li>
+                                <li><strong>Size:</strong> Varying obstacle dimensions</li>
+                                <li><strong>Count:</strong> Variable number of obstacles per episode</li>
+                                <li><strong>Drone start/goal:</strong> Randomized to prevent overfitting to fixed configurations</li>
+                            </ul>
+                        </section>
+                    </section>
+                </div>
+            </div>
+
+            <div id="sidebar">
+                <div class="inner">
+                    <section id="search" class="alt">
+                        <form method="post" action="#"><input type="text" name="query" id="query" placeholder="Search" /></form>
+                    </section>
+                    <nav id="menu">
+                        <header class="major"><h2>Menu</h2></header>
+                        <ul>
+                            <li><a href="index.html">Homepage</a></li>
+                            <li><a href="about.html">About</a></li>
+                            <li><a href="lessons-learnt.html">Lessons Learnt</a></li>
+                            <li><span class="opener">Collaborations</span>
+                                <ul>
+                                    <li><a href="systems-engineering-project-2.html#nicher">Nicher</a></li>
+                                    <li><a href="project-4.html">Bolloré Logistics</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </nav>
+                    <section>
+                        <header class="major"><h2>Get in touch</h2></header>
+                        <p>Feel free to reach out for any opportunities or inquiries.</p>
+                        <ul class="contact">
+                            <li class="icon solid fa-envelope"><a href="mailto:stafford_ho@rocketmail.com">stafford_ho@rocketmail.com</a></li>
+                            <li class="icon solid fa-phone"><a href="tel:+6585060453">(+65) 8506 0453</a></li>
+                            <li class="icon solid fa-home">10 Dover Drive<br />Singapore 138683</li>
+                        </ul>
+                    </section>
+                    <footer id="footer"><p class="copyright">&copy; Stafford Ho Sheng Xian. All rights reserved.</p></footer>
+                </div>
+            </div>
+        </div>
+
+        <button id="topButton" onclick="scrollToTop()" title="Go to top">Top</button>
+        <script src="assets/js/jquery.min.js"></script>
+        <script src="assets/js/browser.min.js"></script>
+        <script src="assets/js/breakpoints.min.js"></script>
+        <script src="assets/js/util.js"></script>
+        <script src="assets/js/main.js"></script>
+        <script>
+            function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+            window.onscroll = function() {scrollFunction()};
+            function scrollFunction() { var b = document.getElementById("topButton"); if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) { b.style.display = "block"; } else { b.style.display = "none"; } }
+        </script>
+    </body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>SPARK 2026 Technical Documentation</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+        <link rel="stylesheet" href="assets/css/main.css" />
+        <style>
+            .major h2, .major h3 { border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+            .video-container, .image.object { margin-bottom: 30px; }
+            #topButton { display: none; position: fixed; bottom: 20px; right: 30px; z-index: 99; border: none; outline: none; background-color: #000; color: white; cursor: pointer; padding: 15px; border-radius: 10px; font-size: 16px; line-height: normal; text-align: center; vertical-align: middle; }
+            #topButton:hover { background-color: #555; }
+        </style>
+    </head>
+    <body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="index.html" class="logo"><strong>Stafford Ho Sheng Xian</strong></a>
+                        <ul class="icons">
+                            <li><a href="https://github.com/StaffordHo" class="icon brands fa-github"><span class="label">Github</span></a></li>
+                            <li><a href="https://www.linkedin.com/in/stafford-ho/" class="icon brands fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
+                            <li><a href="index.html#projects" class="icon solid fa-folder"><span class="label">Projects</span><span class="text">Projects</span></a></li>
+                            <li><a href="resume.pdf" class="icon solid fa-file-alt" target="_blank"><span class="label">Resume</span><span class="text">Resume</span></a></li>
+                        </ul>
+                    </header>
+
+                    <section>
+                        <header class="major">
+                            <h2>SPARK Challenge 2026 &mdash; Technical Documentation</h2>
+                        </header>
+                        <p>Technical details of the event-based spacecraft pose estimation pipeline developed for the <a href="spark-2026.html">SPARK Challenge 2026</a> (AI4Space @ CVPR 2026, Stream 2).</p>
+
+                        <section>
+                            <h3>1. Event Camera Data &amp; the SPADES Dataset</h3>
+                            <p>Unlike conventional frame-based cameras, <strong>event cameras</strong> (neuromorphic sensors) output asynchronous per-pixel brightness changes. Each event is a tuple <code>(x, y, t, p)</code> representing the pixel coordinate, timestamp, and polarity (positive or negative change).</p>
+                            <p>The <strong>SPADES dataset</strong> provides event streams of a spacecraft model under varied lighting and motion profiles, split into <strong>Synthetic</strong> and <strong>Real</strong> partitions. Each sample has ground-truth 6-DoF pose labels (position + quaternion orientation).</p>
+
+                            <h3>2. Voxel-Grid Encoding</h3>
+                            <p>Raw event streams are converted into a fixed-size tensor representation using <strong>voxel-grid encoding</strong>:</p>
+                            <pre><code># Voxel-grid parameters
+num_temporal_bins = 5    # Temporal resolution
+num_polarities   = 2    # Positive & negative events
+# Output: tensor of shape [C=10, H, W]
+# where C = num_temporal_bins × num_polarities
+
+def events_to_voxel_grid(events, H, W, num_bins=5):
+    """Convert event stream to voxel grid tensor."""
+    voxel_grid = np.zeros((2 * num_bins, H, W), dtype=np.float32)
+    
+    t_start, t_end = events['t'].min(), events['t'].max()
+    t_norm = (events['t'] - t_start) / (t_end - t_start + 1e-6)
+    
+    for i in range(len(events)):
+        x, y = events['x'][i], events['y'][i]
+        p = events['p'][i]  # 0 or 1
+        bin_idx = int(t_norm[i] * num_bins)
+        bin_idx = min(bin_idx, num_bins - 1)
+        channel = p * num_bins + bin_idx
+        voxel_grid[channel, y, x] += 1.0
+    
+    return voxel_grid</code></pre>
+                            <p>This encoding preserves both <strong>spatial structure</strong> (where events occurred) and <strong>temporal dynamics</strong> (when events occurred within the time window), producing a 10-channel image-like tensor suitable for CNN processing.</p>
+
+                            <h3>3. Model Architecture</h3>
+                            <p>The network follows a <strong>ResNet-style</strong> architecture adapted for 10-channel voxel-grid input:</p>
+                            <pre><code>class SpacecraftPoseNet(nn.Module):
+    def __init__(self, num_input_channels=10):
+        super().__init__()
+        # Modified ResNet backbone for 10-channel input
+        self.backbone = models.resnet34(pretrained=False)
+        self.backbone.conv1 = nn.Conv2d(
+            num_input_channels, 64,
+            kernel_size=7, stride=2, padding=3, bias=False
+        )
+        num_features = self.backbone.fc.in_features
+        self.backbone.fc = nn.Identity()
+        
+        # Pose regression heads
+        self.translation_head = nn.Linear(num_features, 3)   # (tx, ty, tz)
+        self.rotation_head = nn.Linear(num_features, 4)      # quaternion (qw, qx, qy, qz)
+    
+    def forward(self, x):
+        features = self.backbone(x)
+        t = self.translation_head(features)
+        q = self.rotation_head(features)
+        q = F.normalize(q, dim=-1)  # Unit quaternion constraint
+        return t, q</code></pre>
+
+                            <h3>4. Loss Functions</h3>
+                            <h4>Geodesic Loss on SO(3)</h4>
+                            <p>For rotation estimation, standard L2 loss on quaternions does not respect the geometry of the rotation manifold. Instead, we use the <strong>geodesic distance on SO(3)</strong>:</p>
+                            <pre><code>def geodesic_loss(q_pred, q_gt):
+    """
+    Geodesic loss on SO(3) via quaternion inner product.
+    L = arccos(|&lt;q_pred, q_gt&gt;|)
+    """
+    # Ensure unit quaternions
+    q_pred = F.normalize(q_pred, dim=-1)
+    q_gt = F.normalize(q_gt, dim=-1)
+    
+    # Inner product (absolute value handles double-cover)
+    dot = torch.abs(torch.sum(q_pred * q_gt, dim=-1))
+    dot = torch.clamp(dot, -1.0 + 1e-7, 1.0 - 1e-7)
+    
+    return torch.mean(torch.acos(dot))</code></pre>
+                            <p>This loss measures the <strong>angle</strong> of the shortest rotation between predicted and ground-truth orientations, providing a geometrically meaningful gradient signal.</p>
+
+                            <h4>Translation Loss</h4>
+                            <pre><code>translation_loss = F.mse_loss(t_pred, t_gt)</code></pre>
+
+                            <h4>Combined Loss</h4>
+                            <pre><code>total_loss = translation_loss + lambda_rot * geodesic_loss(q_pred, q_gt)</code></pre>
+
+                            <h3>5. Training Configuration</h3>
+                            <table>
+                                <tr><th>Parameter</th><th>Value</th></tr>
+                                <tr><td>GPU</td><td>NVIDIA RTX 4090</td></tr>
+                                <tr><td>Optimizer</td><td>AdamW</td></tr>
+                                <tr><td>Learning Rate</td><td>1e-4 with cosine annealing</td></tr>
+                                <tr><td>Batch Size</td><td>32</td></tr>
+                                <tr><td>Backbone</td><td>ResNet-34 (modified input layer)</td></tr>
+                                <tr><td>Input Channels</td><td>10 (5 bins × 2 polarities)</td></tr>
+                                <tr><td>Data Splits</td><td>Synthetic + Real (SPADES)</td></tr>
+                            </table>
+
+                            <h3>6. Results</h3>
+                            <p><strong>9th place globally</strong> in Stream 2 at the AI4Space 2026 workshop, CVPR 2026.</p>
+                        </section>
+                    </section>
+                </div>
+            </div>
+
+            <div id="sidebar">
+                <div class="inner">
+                    <section id="search" class="alt">
+                        <form method="post" action="#"><input type="text" name="query" id="query" placeholder="Search" /></form>
+                    </section>
+                    <nav id="menu">
+                        <header class="major"><h2>Menu</h2></header>
+                        <ul>
+                            <li><a href="index.html">Homepage</a></li>
+                            <li><a href="about.html">About</a></li>
+                            <li><a href="lessons-learnt.html">Lessons Learnt</a></li>
+                            <li><span class="opener">Collaborations</span>
+                                <ul>
+                                    <li><a href="systems-engineering-project-2.html#nicher">Nicher</a></li>
+                                    <li><a href="project-4.html">Bolloré Logistics</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </nav>
+                    <section>
+                        <header class="major"><h2>Get in touch</h2></header>
+                        <p>Feel free to reach out for any opportunities or inquiries.</p>
+                        <ul class="contact">
+                            <li class="icon solid fa-envelope"><a href="mailto:stafford_ho@rocketmail.com">stafford_ho@rocketmail.com</a></li>
+                            <li class="icon solid fa-phone"><a href="tel:+6585060453">(+65) 8506 0453</a></li>
+                            <li class="icon solid fa-home">10 Dover Drive<br />Singapore 138683</li>
+                        </ul>
+                    </section>
+                    <footer id="footer"><p class="copyright">&copy; Stafford Ho Sheng Xian. All rights reserved.</p></footer>
+                </div>
+            </div>
+        </div>
+
+        <button id="topButton" onclick="scrollToTop()" title="Go to top">Top</button>
+        <script src="assets/js/jquery.min.js"></script>
+        <script src="assets/js/browser.min.js"></script>
+        <script src="assets/js/breakpoints.min.js"></script>
+        <script src="assets/js/util.js"></script>
+        <script src="assets/js/main.js"></script>
+        <script>
+            function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+            window.onscroll = function() {scrollFunction()};
+            function scrollFunction() { var b = document.getElementById("topButton"); if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) { b.style.display = "block"; } else { b.style.display = "none"; } }
+        </script>
+    </body>
+</html>

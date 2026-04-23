@@ -1,0 +1,375 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>CubeSat Technical Documentation</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+        <link rel="stylesheet" href="assets/css/main.css" />
+        <style>
+            .major h2, .major h3 { border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+            .video-container, .image.object { margin-bottom: 30px; }
+            #topButton { display: none; position: fixed; bottom: 20px; right: 30px; z-index: 99; border: none; outline: none; background-color: #000; color: white; cursor: pointer; padding: 15px; border-radius: 10px; font-size: 16px; line-height: normal; text-align: center; vertical-align: middle; }
+            #topButton:hover { background-color: #555; }
+        </style>
+    </head>
+    <body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="index.html" class="logo"><strong>Stafford Ho Sheng Xian</strong></a>
+                        <ul class="icons">
+                            <li><a href="https://github.com/StaffordHo" class="icon brands fa-github"><span class="label">Github</span></a></li>
+                            <li><a href="https://www.linkedin.com/in/stafford-ho/" class="icon brands fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
+                            <li><a href="index.html#projects" class="icon solid fa-folder"><span class="label">Projects</span><span class="text">Projects</span></a></li>
+                            <li><a href="resume.pdf" class="icon solid fa-file-alt" target="_blank"><span class="label">Resume</span><span class="text">Resume</span></a></li>
+                        </ul>
+                    </header>
+
+                    <section>
+                        <header class="major">
+                            <h2>CubeSat Building Workshop &mdash; Technical Documentation</h2>
+                        </header>
+                        <p>Full firmware walkthrough for the <a href="cubesat.html">CubeSat avionics stack</a> built during the SpaceFaculty workshop. Source code: <a href="https://github.com/StaffordHo/CubeSatelliteAdventures" target="_blank">GitHub Repository</a></p>
+
+                        <!-- System Architecture -->
+                        <section>
+                            <h3>1. System Architecture</h3>
+                            <p>The CubeSat system is a <strong>three-node architecture</strong>, each running on an Arduino with LoRa radio modules communicating at 434&nbsp;MHz:</p>
+                            <pre><code>┌─────────────────┐     LoRa 434 MHz     ┌─────────────────┐     LoRa 434 MHz     ┌─────────────────┐
+│  Ground Station │ ◄──────────────────► │       OBC       │ ◄──────────────────► │      ADCS       │
+│      (GS)       │                      │  (On-Board Comp)│                      │ (Attitude Det.  │
+│                 │                      │                 │                      │  & Control)     │
+│ • Send commands │                      │ • Route commands│                      │ • IMU sensing   │
+│ • Receive telem.│                      │ • Camera capture│                      │ • Sun sensors   │
+│ • Token auth    │                      │ • Sensor aggreg.│                      │ • GPS/NMEA      │
+│ • Image display │                      │ • Binary chunked│                      │ • PID reaction  │
+│                 │                      │   image xmit    │                      │   wheel control │
+└─────────────────┘                      └─────────────────┘                      └─────────────────┘</code></pre>
+                            <p>All nodes share a common password token (<code>STAFFORDPWROX</code>) for mutual authentication.</p>
+                        </section>
+
+                        <!-- ADCS -->
+                        <section>
+                            <h3>2. ADCS Firmware</h3>
+                            <p>The ADCS subsystem implements attitude sensing and reaction wheel control:</p>
+
+                            <h4>Sensor Data Structures</h4>
+                            <pre><code>struct SunSensorData {
+    int topLeft;
+    int topRight;
+    int bottomLeft;
+    int bottomRight;
+};
+
+struct GPSData {
+    float latitude;
+    float longitude;
+    float altitude;
+    bool fix;
+};
+
+struct IMUData {
+    float accelX, accelY, accelZ;
+    float gyroX, gyroY, gyroZ;
+};</code></pre>
+
+                            <h4>PID Sun-Pointing Controller</h4>
+                            <p>The reaction wheel is driven by a PID controller that uses the sun sensor differential to point the satellite towards the sun:</p>
+                            <pre><code>// PID parameters
+float Kp = 2.0, Ki = 0.5, Kd = 1.0;
+float integral = 0, previousError = 0;
+
+float computePID(float error) {
+    integral += error;
+    float derivative = error - previousError;
+    previousError = error;
+    
+    float output = Kp * error + Ki * integral + Kd * derivative;
+    
+    // Clamp output to motor range
+    output = constrain(output, -255, 255);
+    return output;
+}
+
+void controlReactionWheel() {
+    SunSensorData sun = readSunSensors();
+    
+    // Error = difference between left and right sun sensors
+    float error = (sun.topLeft + sun.bottomLeft) - 
+                  (sun.topRight + sun.bottomRight);
+    
+    float motorSpeed = computePID(error);
+    setMotorSpeed(motorSpeed);
+}</code></pre>
+
+                            <h4>Shake-Override Safety Logic</h4>
+                            <p>If the IMU detects excessive vibration (indicating a physical disturbance), the reaction wheel is immediately stopped:</p>
+                            <pre><code>bool checkShakeOverride() {
+    IMUData imu = readIMU();
+    float magnitude = sqrt(
+        imu.accelX * imu.accelX + 
+        imu.accelY * imu.accelY + 
+        imu.accelZ * imu.accelZ
+    );
+    
+    // If acceleration exceeds threshold, disable reaction wheel
+    if (magnitude > SHAKE_THRESHOLD) {
+        setMotorSpeed(0);
+        return true;  // Override active
+    }
+    return false;
+}</code></pre>
+
+                            <h4>GPS NMEA Parsing</h4>
+                            <pre><code>GPSData parseNMEA(String sentence) {
+    GPSData gps;
+    // Parse $GPGGA sentence
+    if (sentence.startsWith("$GPGGA")) {
+        // Extract latitude, longitude, altitude, fix quality
+        String tokens[15];
+        int idx = 0;
+        int start = 0;
+        for (int i = 0; i < sentence.length(); i++) {
+            if (sentence.charAt(i) == ',') {
+                tokens[idx++] = sentence.substring(start, i);
+                start = i + 1;
+            }
+        }
+        gps.latitude = convertNMEAtoDecimal(tokens[2], tokens[3]);
+        gps.longitude = convertNMEAtoDecimal(tokens[4], tokens[5]);
+        gps.altitude = tokens[9].toFloat();
+        gps.fix = (tokens[6].toInt() > 0);
+    }
+    return gps;
+}</code></pre>
+
+                            <h4>Telemetry Sender</h4>
+                            <pre><code>void sendTelemetry() {
+    SunSensorData sun = readSunSensors();
+    IMUData imu = readIMU();
+    GPSData gps = readGPS();
+    
+    String telemetry = "ADCS_TELEM|";
+    telemetry += "SUN:" + String(sun.topLeft) + "," + 
+                 String(sun.topRight) + "," +
+                 String(sun.bottomLeft) + "," + 
+                 String(sun.bottomRight) + "|";
+    telemetry += "IMU:" + String(imu.accelX, 2) + "," + 
+                 String(imu.accelY, 2) + "," + 
+                 String(imu.accelZ, 2) + "|";
+    telemetry += "GPS:" + String(gps.latitude, 6) + "," + 
+                 String(gps.longitude, 6) + "," + 
+                 String(gps.altitude, 1);
+    
+    LoRa.beginPacket();
+    LoRa.print(telemetry);
+    LoRa.endPacket();
+}</code></pre>
+                        </section>
+
+                        <!-- OBC -->
+                        <section>
+                            <h3>3. OBC Firmware</h3>
+                            <p>The On-Board Computer serves as the central hub:</p>
+
+                            <h4>Token-Based Command Routing</h4>
+                            <pre><code>#define PASSWORD "STAFFORDPWROX"
+bool authenticated = false;
+
+void processIncoming(String message) {
+    if (!authenticated) {
+        if (message == PASSWORD) {
+            authenticated = true;
+            sendLoRa("AUTH_OK");
+        } else {
+            sendLoRa("AUTH_FAIL");
+        }
+        return;
+    }
+    
+    // Route authenticated commands
+    if (message.startsWith("ADCS_")) {
+        // Pass-through to ADCS subsystem
+        forwardToADCS(message.substring(5));
+    } else if (message == "GET_IMAGE") {
+        captureAndTransmitImage();
+    } else if (message == "GET_TELEMETRY") {
+        aggregateAndSendTelemetry();
+    }
+}</code></pre>
+
+                            <h4>Chunked Binary Camera Transmission</h4>
+                            <p>Camera images are too large for a single LoRa packet (max ~255 bytes). The OBC chunks the binary data:</p>
+                            <pre><code>#define CHUNK_SIZE 200  // bytes per LoRa packet
+
+void captureAndTransmitImage() {
+    // Capture image from camera module
+    uint8_t* imageData;
+    uint32_t imageSize = captureImage(&imageData);
+    
+    // Send header: total size and number of chunks
+    uint16_t numChunks = (imageSize + CHUNK_SIZE - 1) / CHUNK_SIZE;
+    String header = "IMG_START|" + String(imageSize) + "|" + 
+                    String(numChunks);
+    sendLoRa(header);
+    delay(100);
+    
+    // Send image in chunks
+    for (uint16_t i = 0; i < numChunks; i++) {
+        uint32_t offset = i * CHUNK_SIZE;
+        uint16_t thisChunkSize = min(CHUNK_SIZE, 
+                                     imageSize - offset);
+        
+        LoRa.beginPacket();
+        LoRa.write(i >> 8);        // Chunk index (high byte)
+        LoRa.write(i & 0xFF);      // Chunk index (low byte)
+        LoRa.write(imageData + offset, thisChunkSize);
+        LoRa.endPacket();
+        delay(50);  // Inter-packet delay for reliability
+    }
+    
+    sendLoRa("IMG_END");
+}</code></pre>
+
+                            <h4>Asynchronous Command Pass-Through</h4>
+                            <pre><code>void forwardToADCS(String command) {
+    // Forward command to ADCS via LoRa
+    String adcsPacket = "CMD|" + command;
+    sendLoRa(adcsPacket);
+    
+    // Wait for ADCS acknowledgment (with timeout)
+    unsigned long startTime = millis();
+    while (millis() - startTime < 5000) {  // 5s timeout
+        if (LoRa.parsePacket()) {
+            String response = readLoRa();
+            if (response.startsWith("ACK|")) {
+                // Forward ACK back to Ground Station
+                sendLoRa("ADCS_" + response);
+                return;
+            }
+        }
+    }
+    sendLoRa("ADCS_TIMEOUT");
+}</code></pre>
+                        </section>
+
+                        <!-- Ground Station -->
+                        <section>
+                            <h3>4. Ground Station Firmware</h3>
+                            <p>The Ground Station handles authentication, command dispatch, and image reassembly:</p>
+
+                            <h4>Authentication Handshake</h4>
+                            <pre><code>void authenticate() {
+    sendLoRa(PASSWORD);
+    
+    unsigned long startTime = millis();
+    while (millis() - startTime < 10000) {
+        if (LoRa.parsePacket()) {
+            String response = readLoRa();
+            if (response == "AUTH_OK") {
+                Serial.println("Authenticated with OBC!");
+                authenticated = true;
+                return;
+            }
+        }
+    }
+    Serial.println("Authentication timeout.");
+}</code></pre>
+
+                            <h4>Image Reassembly</h4>
+                            <pre><code>uint8_t imageBuffer[65535];
+uint32_t expectedSize = 0;
+uint16_t receivedChunks = 0;
+
+void receiveImage() {
+    // Wait for IMG_START header
+    // Parse chunks and reassemble
+    while (true) {
+        if (LoRa.parsePacket()) {
+            int packetSize = LoRa.available();
+            
+            if (packetSize > 2) {
+                // Binary chunk: first 2 bytes = chunk index
+                uint16_t chunkIdx = (LoRa.read() << 8) | LoRa.read();
+                uint32_t offset = chunkIdx * CHUNK_SIZE;
+                
+                int bytesRead = 0;
+                while (LoRa.available()) {
+                    imageBuffer[offset + bytesRead++] = LoRa.read();
+                }
+                receivedChunks++;
+            }
+        }
+    }
+    // Output raw binary to Serial for host-side display
+    Serial.write(imageBuffer, expectedSize);
+}</code></pre>
+                        </section>
+
+                        <section>
+                            <h3>5. Communication Protocol Summary</h3>
+                            <table>
+                                <tr><th>Message</th><th>Direction</th><th>Purpose</th></tr>
+                                <tr><td><code>STAFFORDPWROX</code></td><td>GS &rarr; OBC</td><td>Authentication token</td></tr>
+                                <tr><td><code>AUTH_OK / AUTH_FAIL</code></td><td>OBC &rarr; GS</td><td>Authentication response</td></tr>
+                                <tr><td><code>GET_TELEMETRY</code></td><td>GS &rarr; OBC</td><td>Request sensor telemetry</td></tr>
+                                <tr><td><code>ADCS_TELEM|...</code></td><td>ADCS &rarr; OBC &rarr; GS</td><td>Telemetry data payload</td></tr>
+                                <tr><td><code>GET_IMAGE</code></td><td>GS &rarr; OBC</td><td>Request camera capture</td></tr>
+                                <tr><td><code>IMG_START|size|chunks</code></td><td>OBC &rarr; GS</td><td>Image transfer header</td></tr>
+                                <tr><td><code>[binary chunks]</code></td><td>OBC &rarr; GS</td><td>Chunked image data</td></tr>
+                                <tr><td><code>IMG_END</code></td><td>OBC &rarr; GS</td><td>Image transfer complete</td></tr>
+                                <tr><td><code>CMD|...</code></td><td>OBC &rarr; ADCS</td><td>Pass-through commands</td></tr>
+                                <tr><td><code>ACK|...</code></td><td>ADCS &rarr; OBC</td><td>Command acknowledgments</td></tr>
+                            </table>
+                        </section>
+                    </section>
+                </div>
+            </div>
+
+            <div id="sidebar">
+                <div class="inner">
+                    <section id="search" class="alt">
+                        <form method="post" action="#"><input type="text" name="query" id="query" placeholder="Search" /></form>
+                    </section>
+                    <nav id="menu">
+                        <header class="major"><h2>Menu</h2></header>
+                        <ul>
+                            <li><a href="index.html">Homepage</a></li>
+                            <li><a href="about.html">About</a></li>
+                            <li><a href="lessons-learnt.html">Lessons Learnt</a></li>
+                            <li><span class="opener">Collaborations</span>
+                                <ul>
+                                    <li><a href="systems-engineering-project-2.html#nicher">Nicher</a></li>
+                                    <li><a href="project-4.html">Bolloré Logistics</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </nav>
+                    <section>
+                        <header class="major"><h2>Get in touch</h2></header>
+                        <p>Feel free to reach out for any opportunities or inquiries.</p>
+                        <ul class="contact">
+                            <li class="icon solid fa-envelope"><a href="mailto:stafford_ho@rocketmail.com">stafford_ho@rocketmail.com</a></li>
+                            <li class="icon solid fa-phone"><a href="tel:+6585060453">(+65) 8506 0453</a></li>
+                            <li class="icon solid fa-home">10 Dover Drive<br />Singapore 138683</li>
+                        </ul>
+                    </section>
+                    <footer id="footer"><p class="copyright">&copy; Stafford Ho Sheng Xian. All rights reserved.</p></footer>
+                </div>
+            </div>
+        </div>
+
+        <button id="topButton" onclick="scrollToTop()" title="Go to top">Top</button>
+        <script src="assets/js/jquery.min.js"></script>
+        <script src="assets/js/browser.min.js"></script>
+        <script src="assets/js/breakpoints.min.js"></script>
+        <script src="assets/js/util.js"></script>
+        <script src="assets/js/main.js"></script>
+        <script>
+            function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+            window.onscroll = function() {scrollFunction()};
+            function scrollFunction() { var b = document.getElementById("topButton"); if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) { b.style.display = "block"; } else { b.style.display = "none"; } }
+        </script>
+    </body>
+</html>

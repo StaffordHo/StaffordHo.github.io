@@ -1,0 +1,129 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>CV-RL Autonomous Drone Pipeline</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+        <link rel="stylesheet" href="assets/css/main.css" />
+        <style>
+            .major h2, .major h3 { border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+            .video-container, .image.object { margin-bottom: 30px; }
+            #topButton { display: none; position: fixed; bottom: 20px; right: 30px; z-index: 99; border: none; outline: none; background-color: #000; color: white; cursor: pointer; padding: 15px; border-radius: 10px; font-size: 16px; line-height: normal; text-align: center; vertical-align: middle; }
+            #topButton:hover { background-color: #555; }
+        </style>
+    </head>
+    <body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="index.html" class="logo"><strong>Stafford Ho Sheng Xian</strong></a>
+                        <ul class="icons">
+                            <li><a href="https://github.com/StaffordHo" class="icon brands fa-github"><span class="label">Github</span></a></li>
+                            <li><a href="https://www.linkedin.com/in/stafford-ho/" class="icon brands fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
+                            <li><a href="index.html#projects" class="icon solid fa-folder"><span class="label">Projects</span><span class="text">Projects</span></a></li>
+                            <li><a href="resume.pdf" class="icon solid fa-file-alt" target="_blank"><span class="label">Resume</span><span class="text">Resume</span></a></li>
+                        </ul>
+                    </header>
+
+                    <section>
+                        <header class="major">
+                            <h2>CV-RL Autonomous Drone Pipeline (Isaac Sim + OmniDrones)</h2>
+                        </header>
+                        <p>Developed a <strong>Teleop &rarr; Behaviour Cloning &rarr; PPO fine-tuning</strong> pipeline for autonomous quadrotor navigation with obstacle avoidance in NVIDIA Isaac Sim.</p>
+
+                        <div class="image object">
+                            <img src="images/drone_pipeline_card.png" alt="CV-RL Autonomous Drone Pipeline" style="width:100%;" />
+                        </div>
+
+                        <h3>Project Overview</h3>
+                        <p>This project explores a progressive training pipeline for autonomous quadrotor navigation. Starting from human teleoperation demonstrations, the system bootstraps a behaviour cloning policy, then refines it using Proximal Policy Optimization (PPO) reinforcement learning in a physics-accurate simulation environment.</p>
+
+                        <h3>Pipeline Architecture</h3>
+                        <h4>Stage 1: Teleoperation</h4>
+                        <p>A human operator flies the quadrotor through obstacle-rich environments, collecting expert demonstration trajectories that capture obstacle avoidance strategies and efficient navigation paths.</p>
+
+                        <h4>Stage 2: Behaviour Cloning</h4>
+                        <p>The collected demonstrations are used to train an initial policy via supervised imitation learning. This provides a warm-start policy that already exhibits basic navigation competence.</p>
+
+                        <h4>Stage 3: PPO Fine-Tuning</h4>
+                        <p>The behaviour-cloned policy is further refined using PPO in the simulation environment. The RL phase enables the agent to:</p>
+                        <ul>
+                            <li>Discover novel strategies beyond the demonstration distribution</li>
+                            <li>Optimize for long-horizon objectives (e.g., minimizing flight time)</li>
+                            <li>Generalize to unseen obstacle configurations</li>
+                        </ul>
+
+                        <h3>Custom Gymnasium Environment</h3>
+                        <p>Built a custom <strong>Gymnasium-compatible</strong> environment within NVIDIA Isaac Sim + OmniDrones featuring:</p>
+                        <ul>
+                            <li><strong>Collision detection</strong> with termination on contact</li>
+                            <li><strong>Obstacle randomization</strong> for domain randomization during training</li>
+                            <li><strong>Expert-demonstration capture</strong> from teleoperation sessions</li>
+                            <li><strong>Training diagnostics</strong> including reward curves and episode statistics</li>
+                        </ul>
+
+                        <h3>Skills &amp; Technologies</h3>
+                        <p><strong>Python</strong>, <strong>PyTorch</strong>, <strong>Stable-Baselines3</strong>, <strong>Gymnasium</strong>, <strong>PPO</strong>, <strong>Behaviour Cloning</strong>, <strong>NVIDIA Isaac Sim</strong>, <strong>OmniDrones</strong>, <strong>Reinforcement Learning</strong></p>
+
+                        <ul class="actions">
+                            <li><a href="drone-pipeline-doc.html" class="button">Technical Documentation</a></li>
+                        </ul>
+                    </section>
+                </div>
+            </div>
+
+            <div id="sidebar">
+                <div class="inner">
+                    <section id="search" class="alt">
+                        <form method="post" action="#">
+                            <input type="text" name="query" id="query" placeholder="Search" />
+                        </form>
+                    </section>
+                    <nav id="menu">
+                        <header class="major"><h2>Menu</h2></header>
+                        <ul>
+                            <li><a href="index.html">Homepage</a></li>
+                            <li><a href="about.html">About</a></li>
+                            <li><a href="lessons-learnt.html">Lessons Learnt</a></li>
+                            <li>
+                                <span class="opener">Collaborations</span>
+                                <ul>
+                                    <li><a href="systems-engineering-project-2.html#nicher">Nicher</a></li>
+                                    <li><a href="project-4.html">Bolloré Logistics</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </nav>
+                    <section>
+                        <header class="major"><h2>Get in touch</h2></header>
+                        <p>Feel free to reach out for any opportunities or inquiries.</p>
+                        <ul class="contact">
+                            <li class="icon solid fa-envelope"><a href="mailto:stafford_ho@rocketmail.com">stafford_ho@rocketmail.com</a></li>
+                            <li class="icon solid fa-phone"><a href="tel:+6585060453">(+65) 8506 0453</a></li>
+                            <li class="icon solid fa-home">10 Dover Drive<br />Singapore 138683</li>
+                        </ul>
+                    </section>
+                    <footer id="footer">
+                        <p class="copyright">&copy; Stafford Ho Sheng Xian. All rights reserved.</p>
+                    </footer>
+                </div>
+            </div>
+        </div>
+
+        <button id="topButton" onclick="scrollToTop()" title="Go to top">Top</button>
+        <script src="assets/js/jquery.min.js"></script>
+        <script src="assets/js/browser.min.js"></script>
+        <script src="assets/js/breakpoints.min.js"></script>
+        <script src="assets/js/util.js"></script>
+        <script src="assets/js/main.js"></script>
+        <script>
+            function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+            window.onscroll = function() {scrollFunction()};
+            function scrollFunction() {
+                var topButton = document.getElementById("topButton");
+                if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) { topButton.style.display = "block"; } else { topButton.style.display = "none"; }
+            }
+        </script>
+    </body>
+</html>

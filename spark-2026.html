@@ -1,0 +1,163 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>SPARK Challenge 2026</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+        <link rel="stylesheet" href="assets/css/main.css" />
+        <style>
+            .major h2, .major h3 {
+                border-bottom: 2px solid #ddd;
+                padding-bottom: 10px;
+            }
+            .video-container, .image.object {
+                margin-bottom: 30px;
+            }
+            #topButton {
+                display: none;
+                position: fixed;
+                bottom: 20px;
+                right: 30px;
+                z-index: 99;
+                border: none;
+                outline: none;
+                background-color: #000;
+                color: white;
+                cursor: pointer;
+                padding: 15px;
+                border-radius: 10px;
+                font-size: 16px;
+                line-height: normal;
+                text-align: center;
+                vertical-align: middle;
+            }
+            #topButton:hover {
+                background-color: #555;
+            }
+        </style>
+    </head>
+    <body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="index.html" class="logo"><strong>Stafford Ho Sheng Xian</strong></a>
+                        <ul class="icons">
+                            <li><a href="https://github.com/StaffordHo" class="icon brands fa-github"><span class="label">Github</span></a></li>
+                            <li><a href="https://www.linkedin.com/in/stafford-ho/" class="icon brands fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
+                            <li><a href="index.html#projects" class="icon solid fa-folder"><span class="label">Projects</span><span class="text">Projects</span></a></li>
+                            <li><a href="resume.pdf" class="icon solid fa-file-alt" target="_blank"><span class="label">Resume</span><span class="text">Resume</span></a></li>
+                        </ul>
+                    </header>
+
+                    <section>
+                        <header class="major">
+                            <h2>SPARK Challenge 2026 &mdash; Event-Based Spacecraft Pose Estimation</h2>
+                        </header>
+                        <p>Achieved <strong>9th place globally</strong> at the AI4Space 2026 workshop (CVPR 2026) in <strong>Stream 2</strong> by building a 6-DoF spacecraft pose estimation pipeline from event-camera data.</p>
+
+                        <div class="image object">
+                            <img src="images/spark_2026_card.png" alt="SPARK 2026 Spacecraft Pose Estimation" style="width:100%;" />
+                        </div>
+
+                        <h3>Project Overview</h3>
+                        <p>The <a href="https://cvi2.uni.lu/spark2026/" target="_blank">SPARK Challenge 2026</a> is an international competition focused on spacecraft pose estimation, hosted at the AI4Space workshop at CVPR 2026. Stream 2 specifically targets <strong>event-based vision</strong> &mdash; using neuromorphic event cameras instead of traditional frame-based cameras to estimate the 6-DoF (position + orientation) pose of a spacecraft.</p>
+                        <p>Event cameras capture per-pixel brightness changes asynchronously, producing a stream of events rather than frames. This makes them ideal for space applications where lighting conditions change rapidly and motion blur is a concern.</p>
+
+                        <h3>Technical Approach</h3>
+                        <h4>Data Representation</h4>
+                        <p>The raw event stream from the <strong>SPADES dataset</strong> was converted into a <strong>voxel-grid representation</strong> with 5 temporal bins &times; 2 polarities (positive and negative events), producing a 10-channel spatio-temporal tensor for each sample. This encoding preserves both the spatial structure and temporal dynamics of the event data.</p>
+
+                        <h4>Model Architecture</h4>
+                        <ul>
+                            <li><strong>Backbone:</strong> ResNet-style convolutional network adapted for 10-channel voxel-grid input</li>
+                            <li><strong>Pose Head:</strong> Quaternion regression for orientation estimation on SO(3)</li>
+                            <li><strong>Loss Function:</strong> Geodesic loss on SO(3) for rotation, L2 loss for translation</li>
+                            <li><strong>Training:</strong> Trained on an NVIDIA RTX 4090 using both Synthetic and Real event data splits</li>
+                        </ul>
+
+                        <h4>Key Results</h4>
+                        <ul>
+                            <li><strong>9th place globally</strong> in Stream 2 at CVPR 2026 AI4Space workshop</li>
+                            <li>Evaluated on both Synthetic and Real event data from the SPADES dataset</li>
+                            <li>Robust orientation estimation using geodesic loss on the rotation manifold</li>
+                        </ul>
+
+                        <h3>Skills &amp; Technologies</h3>
+                        <p><strong>PyTorch</strong>, <strong>Event Cameras</strong>, <strong>Computer Vision</strong>, <strong>6-DoF Pose Estimation</strong>, <strong>Quaternion Regression</strong>, <strong>SO(3) Geometry</strong>, <strong>Deep Learning</strong></p>
+
+                        <ul class="actions">
+                            <li><a href="spark-2026-doc.html" class="button">Technical Documentation</a></li>
+                        </ul>
+                    </section>
+                </div>
+            </div>
+
+            <div id="sidebar">
+                <div class="inner">
+                    <section id="search" class="alt">
+                        <form method="post" action="#">
+                            <input type="text" name="query" id="query" placeholder="Search" />
+                        </form>
+                    </section>
+
+                    <nav id="menu">
+                        <header class="major">
+                            <h2>Menu</h2>
+                        </header>
+                        <ul>
+                            <li><a href="index.html">Homepage</a></li>
+                            <li><a href="about.html">About</a></li>
+                            <li><a href="lessons-learnt.html">Lessons Learnt</a></li>
+                            <li>
+                                <span class="opener">Collaborations</span>
+                                <ul>
+                                    <li><a href="systems-engineering-project-2.html#nicher">Nicher</a></li>
+                                    <li><a href="project-4.html">Bolloré Logistics</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </nav>
+
+                    <section>
+                        <header class="major">
+                            <h2>Get in touch</h2>
+                        </header>
+                        <p>Feel free to reach out for any opportunities or inquiries.</p>
+                        <ul class="contact">
+                            <li class="icon solid fa-envelope"><a href="mailto:stafford_ho@rocketmail.com">stafford_ho@rocketmail.com</a></li>
+                            <li class="icon solid fa-phone"><a href="tel:+6585060453">(+65) 8506 0453</a></li>
+                            <li class="icon solid fa-home">10 Dover Drive<br />Singapore 138683</li>
+                        </ul>
+                    </section>
+
+                    <footer id="footer">
+                        <p class="copyright">&copy; Stafford Ho Sheng Xian. All rights reserved.</p>
+                    </footer>
+                </div>
+            </div>
+        </div>
+
+        <button id="topButton" onclick="scrollToTop()" title="Go to top">Top</button>
+
+        <script src="assets/js/jquery.min.js"></script>
+        <script src="assets/js/browser.min.js"></script>
+        <script src="assets/js/breakpoints.min.js"></script>
+        <script src="assets/js/util.js"></script>
+        <script src="assets/js/main.js"></script>
+        <script>
+            function scrollToTop() {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            window.onscroll = function() {scrollFunction()};
+            function scrollFunction() {
+                var topButton = document.getElementById("topButton");
+                if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                    topButton.style.display = "block";
+                } else {
+                    topButton.style.display = "none";
+                }
+            }
+        </script>
+    </body>
+</html>
