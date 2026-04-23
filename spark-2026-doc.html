@@ -35,7 +35,11 @@
                         <section>
                             <h3>1. Event Camera Data &amp; the SPADES Dataset</h3>
                             <p>Unlike conventional frame-based cameras, <strong>event cameras</strong> (neuromorphic sensors) output asynchronous per-pixel brightness changes. Each event is a tuple <code>(x, y, t, p)</code> representing the pixel coordinate, timestamp, and polarity (positive or negative change).</p>
-                            <p>The <strong>SPADES dataset</strong> provides event streams of a spacecraft model under varied lighting and motion profiles, split into <strong>Synthetic</strong> and <strong>Real</strong> partitions. Each sample has ground-truth 6-DoF pose labels (position + quaternion orientation).</p>
+                            <p>The <strong>SPADES dataset</strong> (SPAcecraft Pose Estimation Dataset using Event Sensing) provides event streams of a spacecraft model under varied lighting and motion profiles, focusing on the Proba-2 satellite. It is split into two categories:</p>
+                            <ul>
+                                <li><strong>Synthetic Dataset:</strong> Generated using Unreal Engine (UE) with dynamic backgrounds (animated Sun and Earth), and the ICNS event simulator using Blender to model the neuromorphic sensor. It contains 300 trajectories with 179,400 ground-truth pose labels.</li>
+                                <li><strong>Real Dataset:</strong> Collected at the Zero-G Laboratory at the SnT, University of Luxembourg, using a scaled mockup of the Proba-2 satellite and a Prophesee Metavision EVK4-HD event vision sensor. It contains 32 trajectories with 16,900 pose labels.</li>
+                            </ul>
 
                             <h3>2. Voxel-Grid Encoding</h3>
                             <p>Raw event streams are converted into a fixed-size tensor representation using <strong>voxel-grid encoding</strong>:</p>

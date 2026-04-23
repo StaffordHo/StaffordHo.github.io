@@ -61,12 +61,19 @@
                         </div>
 
                         <h3>Project Overview</h3>
-                        <p>The <a href="https://cvi2.uni.lu/spark2026/" target="_blank">SPARK Challenge 2026</a> is an international competition focused on spacecraft pose estimation, hosted at the AI4Space workshop at CVPR 2026. Stream 2 specifically targets <strong>event-based vision</strong> &mdash; using neuromorphic event cameras instead of traditional frame-based cameras to estimate the 6-DoF (position + orientation) pose of a spacecraft.</p>
+                        <p>The <a href="https://ai4space.space/challenge.html" target="_blank">SPARK 2026 Challenge (SPAcecraft Recognition leveraging Knowledge of Space Environment)</a> is an international competition focused on spacecraft pose estimation, hosted at the AI4Space workshop at CVPR 2026. Stream 2 specifically targets <strong>event-based vision</strong> &mdash; using neuromorphic event cameras instead of traditional frame-based cameras to estimate the 6-DoF (position + orientation) pose of a spacecraft.</p>
                         <p>Event cameras capture per-pixel brightness changes asynchronously, producing a stream of events rather than frames. This makes them ideal for space applications where lighting conditions change rapidly and motion blur is a concern.</p>
+
+                        <h3>The SPADES Dataset</h3>
+                        <p>The challenge utilizes the <strong>SPADES</strong> (SPAcecraft Pose Estimation Dataset using Event Sensing) dataset, focusing on the Proba-2 satellite. It contains two categories:</p>
+                        <ul>
+                            <li><strong>Synthetic Data:</strong> Generated using Unreal Engine (UE) and the ICNS event simulator (Blender). It features dynamic backgrounds (animated Sun and Earth) and contains 300 trajectories with 179,400 pose labels.</li>
+                            <li><strong>Real Data:</strong> Collected at the Zero-G Laboratory (SnT, University of Luxembourg) using a scaled mockup of the Proba-2 satellite and a Prophesee Metavision EVK4-HD event vision sensor.</li>
+                        </ul>
 
                         <h3>Technical Approach</h3>
                         <h4>Data Representation</h4>
-                        <p>The raw event stream from the <strong>SPADES dataset</strong> was converted into a <strong>voxel-grid representation</strong> with 5 temporal bins &times; 2 polarities (positive and negative events), producing a 10-channel spatio-temporal tensor for each sample. This encoding preserves both the spatial structure and temporal dynamics of the event data.</p>
+                        <p>The raw event stream from the SPADES dataset was converted into a <strong>voxel-grid representation</strong> with 5 temporal bins &times; 2 polarities (positive and negative events), producing a 10-channel spatio-temporal tensor for each sample. This encoding preserves both the spatial structure and temporal dynamics of the event data.</p>
 
                         <h4>Model Architecture</h4>
                         <ul>
