@@ -10,6 +10,47 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="assets/css/main.css" />
+		<style>
+			/* Interactive UI/UX Enhancements for Project Cards */
+			.posts article {
+				transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+				border-radius: 12px;
+				padding: 20px;
+				background-color: transparent;
+			}
+
+			.posts article:hover {
+				transform: translateY(-8px);
+				box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+				background-color: #ffffff;
+			}
+
+			.posts article .image img {
+				transition: transform 0.5s ease;
+			}
+
+			.posts article:hover .image img {
+				transform: scale(1.05);
+			}
+
+			.posts article .image {
+				overflow: hidden;
+				border-radius: 8px;
+				display: block;
+			}
+
+			/* Scroll Fade-In Animation */
+			.fade-in-scroll {
+				opacity: 0;
+				transform: translateY(40px);
+				transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+			}
+
+			.fade-in-scroll.is-visible {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		</style>
 	</head>
 	<body class="is-preload">
 
@@ -323,6 +364,33 @@
                     topButton.style.display = "none";
                 }
             }
+
+            // Intersection Observer for fade-in scroll animations
+            document.addEventListener("DOMContentLoaded", function() {
+                const observerOptions = {
+                    root: null,
+                    rootMargin: '0px',
+                    threshold: 0.15
+                };
+
+                const observer = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('is-visible');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, observerOptions);
+
+                // Target all project cards in the '.posts' container
+                const projectCards = document.querySelectorAll('.posts article');
+                projectCards.forEach((card, index) => {
+                    card.classList.add('fade-in-scroll');
+                    // Optional: stagger the delay based on index if they appear on screen at the same time
+                    card.style.transitionDelay = `${(index % 3) * 0.1}s`;
+                    observer.observe(card);
+                });
+            });
         </script>
 
 	</body>
