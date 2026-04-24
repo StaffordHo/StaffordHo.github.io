@@ -67,94 +67,95 @@
                     <!-- Content -->
                     <section>
                         <header class="major">
-                            <h2>Project 4: Assembly Line Automation</h2>
+                            <h2>Bolloré Logistics &mdash; Assembly Line Automation</h2>
                         </header>
-                        <p>In collaboration with <a href="https://www.bollore-logistics.com/en/">Bolloré Logistics</a>, this project focuses on problem statement: "Simulate assembly line automation. Using robotics and machines, the students can also model out before and after automation to show the productivity improvement and reduction of reliance on human resources."</p>
-			<!-- Images -->
+                        <p>In collaboration with <a href="https://www.bollore-logistics.com/en/" target="_blank">Bolloré Logistics</a>, this project aimed to overhaul the Value-Added Services (VAS) assembly line. By integrating robotics and autonomous systems, we modeled and physically demonstrated a transition to a Modular Assembly Line (MAL), showcasing significant productivity improvements and reduced reliance on manual labor for High-Mix Low-Volume (HMLV) operations.</p>
+                        
                         <div class="image object">
-			                <img src="images/bollore.png" alt="Bollore logo" style="width:100%; margin-bottom:20px;" />
+                            <img src="images/bollore.png" alt="Bollore Logistics" style="width:100%; margin-bottom:20px; border-radius: 8px;" />
                         </div>
-                        <h3>Learning Objectives</h3>
-                        <ul>
-                            <li>Master the ROS2 Framework including Control, MoveIt2, and Gazebo.</li>
-                            <li>Showcase problem-solving skills and independent learning in new technologies.</li>
-                            <li>Apply Project Management skills to maintain project scope, mitigate risks, and ensure timely deliverables.</li>
+
+                        <ul class="actions">
+                            <li><a href="project-4-doc.html" class="button primary">View Technical Documentation</a></li>
                         </ul>
 
-                        <h3>Learning Outcomes</h3>
+                        <hr class="major" />
 
-                        <h4>The system</h4>
-			<!-- Images -->
-                        <div class="image object">
-			    <img src="images/malvc.jpg" alt="MAL visual components" style="width:100%;" />
-			    <img src="images/maltp.jpg" alt="MAL throughput" style="width:100%;" />
-                            <img src="images/MALirl.jpg" alt="MALirl" style="width:100%;" />
-                        </div>
-			<p>Demonstration of prototype: Modular Assembly Line (MAL) verifying test cases with with <a href="p4doc.html">Technical Documentation</a></p>
-                        <ol>
-                            <li>Testcase 6: Simulate MAL in visual components with positive throughput</li>
-                            <li>Testcase 9: Demonstrate Robotic Arm Kitting (UR10 pick & place SKU into SKU boxes)</li>
-                            <li>Testcase 3: Demonstrate LIMO Autonomous Mobile Robot (AMR) collecting and dropping off carton boxes</li>
-                            <li>Testcase 10: Demonstrate Robotic Arm Cartoning (UR10 pick & place SKU boxes into carton boxes)</li>
-                        </ol>
-
-                        <!-- Videos -->
-			<div class="video-container">
-    				<iframe width="100%" height="315" src="https://www.youtube.com/embed/KHMo1GVo_q4" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-			</div>
-
-			<div class="image object">
-                            <img src="images/alvc.jpg" alt="AL visual components" style="width:100%;" />
-			    <img src="images/altp.jpg" alt="AL throughput" style="width:100%;" />
+                        <h3>1. The System &amp; Simulation Validation</h3>
+                        <p>We modeled both the legacy Assembly Line (AL) and our proposed Modular Assembly Line (MAL) in <strong>Visual Components</strong> to mathematically prove throughput improvements.</p>
+                        
+                        <div class="row">
+                            <div class="col-6 col-12-small">
+                                <h4>MAL Simulation</h4>
+                                <span class="image fit"><img src="images/malvc.jpg" alt="Modular Assembly Line visual components simulation" /></span>
+                            </div>
+                            <div class="col-6 col-12-small">
+                                <h4>MAL Throughput</h4>
+                                <span class="image fit"><img src="images/maltp.jpg" alt="Modular Assembly Line throughput data" /></span>
+                            </div>
+                            <div class="col-6 col-12-small">
+                                <h4>Legacy AL Simulation</h4>
+                                <span class="image fit"><img src="images/alvc.jpg" alt="Legacy Assembly Line visual components simulation" /></span>
+                            </div>
+                            <div class="col-6 col-12-small">
+                                <h4>Legacy AL Throughput</h4>
+                                <span class="image fit"><img src="images/altp.jpg" alt="Legacy Assembly Line throughput data" /></span>
+                            </div>
                         </div>
 
-                    </section>
+                        <br>
+                        <h4>Real-World Demonstration</h4>
+                        <p>We physically verified the simulated test cases using a UR10 robotic arm for kitting/cartoning and an AgileX LIMO AMR for inter-station transport.</p>
+                        <div class="video-container">
+                            <iframe width="100%" height="315" src="https://www.youtube.com/embed/KHMo1GVo_q4" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:8px;"></iframe>
+                        </div>
 
-                    <section>
-                        <h3>Technical Development</h3>
-                        <p>Developed a script in Python to configure the 6-axis movement of a UR10 robot in RoboDK.</p>
-                        <!-- Images -->
-                        <div class="image object">
-                            <img src="images/coords.jpg" alt="RoboDK coordinates" style="width:100%;" />
-                        </div>
-                        <div class="image object">
-                            <img src="images/latentpoint.jpg" alt="Latent point check" style="width:100%;" />
-                        </div>
-                        <div class="image object">
-                            <img src="images/OV1.png" alt="OV1 system overview" style="width:100%;" />
-                        </div>
-                    </section>
+                        <hr class="major" />
 
-                    <section>
-                        <h3>System Architecture Design</h3>
-                        <p>Applied Arcadia and Capella methodologies to design solution architectures.</p>
-                        <!-- Images -->
-                        <div class="image object">
-                            <img src="images/MALSysArch.png" alt="System architecture diagram" style="width:100%;" />
+                        <h3>2. System Architecture &amp; Control</h3>
+                        <p>We applied <strong>Arcadia</strong> and <strong>Capella</strong> methodologies to define the solution architecture. For the physical execution, we scripted UR10 6-axis kinematics using the <strong>RoboDK</strong> Python API.</p>
+                        
+                        <div class="row">
+                            <div class="col-6 col-12-small">
+                                <h4>Arcadia Architecture</h4>
+                                <span class="image fit"><img src="images/MALSysArch.png" alt="System architecture diagram" /></span>
+                            </div>
+                            <div class="col-6 col-12-small">
+                                <h4>System Overview (OV-1)</h4>
+                                <span class="image fit"><img src="images/OV1.png" alt="OV1 system overview" /></span>
+                            </div>
+                            <div class="col-6 col-12-small">
+                                <h4>RoboDK Kinematics</h4>
+                                <span class="image fit"><img src="images/coords.jpg" alt="RoboDK joint coordinate planning" /></span>
+                            </div>
+                            <div class="col-6 col-12-small">
+                                <h4>Latent Path Checking</h4>
+                                <span class="image fit"><img src="images/latentpoint.jpg" alt="RoboDK latent point verification" /></span>
+                            </div>
                         </div>
-                    </section>
 
-                    <section>
-                        <h3>Prototyping & Fabrications</h3>
-                        <p>Innovated a variable conveyor belt system capable of handling high-mix low-volume (HMLV) products.</p>
-                        <!-- Images -->
-                        <div class="image object">
-                            <img src="images/vcb.jpg" alt="Variable conveyor belt" style="width:100%;" />
-                            <img src="images/vcbclose.jpg" alt="Close-up of conveyor belt" style="width:100%;" />
-                        </div>
-                        <p>Fabricated a mount for the LIMO robot, integrating an STM32F303RE MCU for servo motor control, allowing the opening/closing of flaps and tilt adjustments.</p>
-                        <div class="image object">
-                            <img src="images/m1.jpg" alt="Mount for LIMO robot" style="width:100%;" />
-                            <img src="images/m2.jpg" alt="Mount for LIMO robot" style="width:100%;" />
-                        </div>
-                        <p>Designed a housing for a DC vacuum motor used to generate suction for the end-effector.</p>
-                        <div class="image object">
-                            <img src="images/DC.jpg" alt="DC motor housing" style="width:100%;" />
-                            <img src="images/DCfull.jpg" alt="Complete DC motor housing" style="width:100%;" />
-                        </div>
-                        <p>A static mechanical conveyor belt was also used to simulate variable conveyor belt functionality during demonstrations.</p>
-                        <div class="image object">
-                            <img src="images/mcb.jpg" alt="Mechanical conveyor belt" style="width:100%;" />
+                        <hr class="major" />
+
+                        <h3>3. Prototyping &amp; Fabrications</h3>
+                        <p>To enable the UR10 and LIMO to handle complex tasks, we engineered and fabricated custom hardware solutions including a Variable Conveyor Belt, an STM32-driven servo flap mechanism for the AMR, and a custom vacuum end-effector.</p>
+                        
+                        <div class="row">
+                            <div class="col-6 col-12-small">
+                                <h4>Variable Conveyor Belt</h4>
+                                <span class="image fit"><img src="images/vcb.jpg" alt="Variable conveyor belt prototype" /></span>
+                            </div>
+                            <div class="col-6 col-12-small">
+                                <h4>LIMO Interface (STM32)</h4>
+                                <span class="image fit"><img src="images/m2.jpg" alt="LIMO mount with STM32 and servo" /></span>
+                            </div>
+                            <div class="col-6 col-12-small">
+                                <h4>Vacuum Motor Housing</h4>
+                                <span class="image fit"><img src="images/DCfull.jpg" alt="Complete DC vacuum motor housing on UR10" /></span>
+                            </div>
+                            <div class="col-6 col-12-small">
+                                <h4>Physical Validation</h4>
+                                <span class="image fit"><img src="images/MALirl.jpg" alt="Physical UR10 setup" /></span>
+                            </div>
                         </div>
                     </section>
                 </div>

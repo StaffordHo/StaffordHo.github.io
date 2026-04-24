@@ -1,0 +1,162 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>Project 4 Technical Documentation</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+        <link rel="stylesheet" href="assets/css/main.css" />
+        <style>
+            .major h2, .major h3 { border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+            .video-container, .image.object { margin-bottom: 30px; }
+            #topButton { display: none; position: fixed; bottom: 20px; right: 30px; z-index: 99; border: none; outline: none; background-color: #000; color: white; cursor: pointer; padding: 15px; border-radius: 10px; font-size: 16px; line-height: normal; text-align: center; vertical-align: middle; }
+            #topButton:hover { background-color: #555; }
+        </style>
+    </head>
+    <body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="index.html" class="logo"><strong>Stafford Ho Sheng Xian</strong></a>
+                        <ul class="icons">
+                            <li><a href="https://github.com/StaffordHo" class="icon brands fa-github"><span class="label">Github</span></a></li>
+                            <li><a href="https://www.linkedin.com/in/stafford-ho/" class="icon brands fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
+                            <li><a href="index.html#projects" class="icon solid fa-folder"><span class="label">Projects</span><span class="text">Projects</span></a></li>
+                            <li><a href="resume.pdf" class="icon solid fa-file-alt" target="_blank"><span class="label">Resume</span><span class="text">Resume</span></a></li>
+                        </ul>
+                    </header>
+
+                    <section>
+                        <header class="major">
+                            <h2>Project 4: Bolloré Logistics &mdash; Technical Documentation</h2>
+                        </header>
+                        <p>Technical deep dive into the <strong>Modular Assembly Line (MAL)</strong> design, hardware fabrications, and software simulations for the Bolloré Logistics Value-Added Services (VAS) automation project. Back to <a href="project-4.html">Project Overview</a>.</p>
+
+                        <!-- System Architecture -->
+                        <section>
+                            <h3>1. System Architecture (Arcadia &amp; Capella)</h3>
+                            <p>To address the bottleneck in High Mix Low Volume (HMLV) kitting processes, we migrated from the legacy Assembly Line (AL) layout to a <strong>Modular Assembly Line (MAL)</strong>.</p>
+                            <p>We utilized <strong>Arcadia</strong> and <strong>Capella</strong> methodologies to systematically define the operational architecture. The MAL architecture decouples the kitting and cartoning stations using an intermediate <strong>Autonomous Mobile Robot (AMR)</strong> for transport, significantly reducing reliance on manual material handling and increasing system scalability.</p>
+                            <div class="image object">
+                                <img src="images/MALSysArch.png" alt="System Architecture Diagram" style="width:100%; border-radius:8px;" />
+                            </div>
+                        </section>
+
+                        <!-- Hardware Development -->
+                        <section>
+                            <h3>2. Hardware Prototyping &amp; Fabrications</h3>
+                            
+                            <h4>LIMO AMR Interface &amp; Servo Control</h4>
+                            <p>The AgileX LIMO was selected as the AMR to bridge the gap between kitting and cartoning stations. A custom mechanical interface was designed to hold the payload. During development, the design evolved from using bulky linear actuators to a more refined servo motor-driven flap system.</p>
+                            <ul>
+                                <li><strong>Microcontroller:</strong> An <strong>STM32F303RE</strong> MCU processes the logic to actuate the servo motors, dynamically opening and closing the flaps to drop off carton boxes at the target station.</li>
+                                <li><strong>Fabrication:</strong> Custom mounts were 3D-printed to securely interface the STM32 and servo mechanism onto the LIMO chassis.</li>
+                            </ul>
+
+                            <h4>Vacuum End-Effector (UR10)</h4>
+                            <p>For the UR10 robotic arm to perform reliable kitting (pick-and-place), a custom vacuum gripper was engineered:</p>
+                            <ul>
+                                <li>A DC vacuum motor and external air compressor provide the necessary suction force to handle various HMLV SKUs.</li>
+                                <li>A bespoke <strong>Vacuum Motor Housing</strong> was modeled in SolidWorks and fabricated to mount seamlessly onto the UR10 end-effector plate.</li>
+                            </ul>
+
+                            <h4>Variable Conveyor Belt</h4>
+                            <p>To simulate variable throughput, a Variable Conveyor Belt system was designed and fabricated. This conveyor can dynamically adjust its speed to handle different volume loads typical of the Bolloré VAS operations.</p>
+                        </section>
+
+                        <!-- Software & Control -->
+                        <section>
+                            <h3>3. Software &amp; Robotics Control</h3>
+
+                            <h4>ROS2, MoveIt2 &amp; Gazebo Simulation</h4>
+                            <p>The entire automation sequence was first validated in simulation to ensure safety and reachability before deploying to real hardware.</p>
+                            <ul>
+                                <li><strong>Gazebo:</strong> Used to simulate the physics of the UR10 arm, conveyor belts, and LIMO AMR within the virtual Bolloré warehouse environment.</li>
+                                <li><strong>MoveIt2 (ROS2):</strong> Utilized for trajectory planning, collision avoidance, and solving inverse kinematics for the robotic kitting and cartoning tasks.</li>
+                            </ul>
+
+                            <h4>RoboDK Scripting (Physical Deployment)</h4>
+                            <p>For the physical demonstration using the real UR10 arm, Python scripts were developed using the <strong>RoboDK API</strong>. These scripts passed specific joint angles directly to the robot controller to execute the precise pick-and-place trajectories derived from our planning.</p>
+                            <pre><code>from robodk import robolink
+import time
+
+RDK = robolink.Robolink()
+robot_item = RDK.Item('UR10')
+
+# Target joint angles for kitting operations
+joint_angles = [12.61, -37.84, 96.06, 27.87, 88.30, -46.63]
+joint_angles2 = [-6.79, -51.43, 113.53, 27.87, 88.30, -46.63]
+
+# Execute trajectory
+robot_item.setJoints(joint_angles)
+time.sleep(5)
+robot_item.setJoints(joint_angles2)</code></pre>
+                        </section>
+
+                        <!-- Throughput Simulation -->
+                        <section>
+                            <h3>4. Visual Components Throughput Simulation</h3>
+                            <p>To mathematically prove the productivity improvement, <strong>Visual Components</strong> software was used to run a side-by-side throughput analysis of the original Assembly Line (AL) vs. the new Modular Assembly Line (MAL).</p>
+                            <ul>
+                                <li>The simulation confirmed a net <strong>positive throughput increase</strong> when utilizing the UR10 for kitting and the LIMO for transport, successfully meeting the core project objective of reducing human reliance while boosting efficiency.</li>
+                            </ul>
+                        </section>
+
+                    </section>
+                </div>
+            </div>
+
+            <div id="sidebar">
+                <div class="inner">
+                    <section id="search" class="alt">
+                        <form method="post" action="#">
+                            <input type="text" name="query" id="query" placeholder="Search" />
+                        </form>
+                    </section>
+                    <nav id="menu">
+                        <header class="major"><h2>Menu</h2></header>
+                        <ul>
+                            <li><a href="index.html">Homepage</a></li>
+                            <li><a href="about.html">About</a></li>
+                            <li><a href="lessons-learnt.html">Lessons Learnt</a></li>
+                            <li>
+                                <span class="opener">Collaborations</span>
+                                <ul>
+                                    <li><a href="systems-engineering-project-2.html#nicher">Nicher</a></li>
+                                    <li><a href="project-4.html">Bolloré Logistics</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </nav>
+                    <section>
+                        <header class="major"><h2>Get in touch</h2></header>
+                        <p>Feel free to reach out for any opportunities or inquiries.</p>
+                        <ul class="contact">
+                            <li class="icon solid fa-envelope"><a href="mailto:stafford_ho@rocketmail.com">stafford_ho@rocketmail.com</a></li>
+                            <li class="icon solid fa-phone"><a href="tel:+6585060453">(+65) 8506 0453</a></li>
+                            <li class="icon solid fa-home">10 Dover Drive<br />Singapore 138683</li>
+                        </ul>
+                    </section>
+                    <footer id="footer">
+                        <p class="copyright">&copy; Stafford Ho Sheng Xian. All rights reserved.</p>
+                    </footer>
+                </div>
+            </div>
+        </div>
+
+        <button id="topButton" onclick="scrollToTop()" title="Go to top">Top</button>
+        <script src="assets/js/jquery.min.js"></script>
+        <script src="assets/js/browser.min.js"></script>
+        <script src="assets/js/breakpoints.min.js"></script>
+        <script src="assets/js/util.js"></script>
+        <script src="assets/js/main.js"></script>
+        <script>
+            function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+            window.onscroll = function() {scrollFunction()};
+            function scrollFunction() {
+                var topButton = document.getElementById("topButton");
+                if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) { topButton.style.display = "block"; } else { topButton.style.display = "none"; }
+            }
+        </script>
+    </body>
+</html>
