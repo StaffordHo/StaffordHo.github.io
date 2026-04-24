@@ -2294,3 +2294,42 @@ button,
 #topButton:hover {
     background-color: #555; /* Add a dark-grey background on hover */
 }
+
+/* Global UI/UX Enhancements */
+.fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.posts article {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 8px;
+    padding: 15px;
+    background: transparent;
+}
+
+.posts article:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+    background: #fdfdfd;
+}
+
+.posts article .image {
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.posts article .image img {
+    transition: transform 0.5s ease;
+}
+
+.posts article:hover .image img {
+    transform: scale(1.05);
+}
+

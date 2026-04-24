@@ -260,3 +260,28 @@
 			});
 
 })(jQuery);
+	// Global UI/UX Enhancements: IntersectionObserver for fade-in animations
+	(function() {
+		document.addEventListener("DOMContentLoaded", function() {
+			var observerOptions = {
+				root: null,
+				rootMargin: "0px",
+				threshold: 0.15
+			};
+
+			var observer = new IntersectionObserver(function(entries, observer) {
+				entries.forEach(function(entry) {
+					if (entry.isIntersecting) {
+						entry.target.classList.add("visible");
+						observer.unobserve(entry.target); // Fade in once
+					}
+				});
+			}, observerOptions);
+
+			var fadeElements = document.querySelectorAll(".fade-in");
+			fadeElements.forEach(function(el) {
+				observer.observe(el);
+			});
+		});
+	})();
+
