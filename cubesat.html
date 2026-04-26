@@ -58,7 +58,15 @@
                             <p style="margin-top: 10px; font-size: 0.9em; color: #888;"><em>*Note: The image above is a photorealistic rendering for illustration purposes, depicting how the fully deployed 1U CubeSat might look in orbit.</em></p>
                         </div>
 
-                        <p>This hands-on workshop organized by <strong>SpaceFaculty</strong> challenged participants to build a functional CubeSat avionics stack from scratch. The system comprises three independent nodes &mdash; <strong>Ground Station (GS)</strong>, <strong>On-Board Computer (OBC)</strong>, and <strong>Attitude Determination and Control System (ADCS)</strong> &mdash; each running on an Arduino and communicating wirelessly over LoRa radio at 434&nbsp;MHz.</p>
+                        <p>This hands-on workshop organized by <strong>SpaceFaculty</strong> challenged participants to build a functional 1U CubeSat avionics stack from scratch. The system comprises three independent nodes &mdash; <strong>Ground Station (GS)</strong>, <strong>On-Board Computer (OBC)</strong>, and <strong>Attitude Determination and Control System (ADCS)</strong> &mdash; each running on an Arduino and communicating wirelessly over LoRa radio at 434&nbsp;MHz.</p>
+
+                        <h3>Mission Analysis (GMAT)</h3>
+                        <p>Prior to hardware integration, we utilized the <strong>General Mission Analysis Tool (GMAT)</strong> to validate the satellite's operational feasibility. This comprehensive analysis included:</p>
+                        <ul>
+                            <li><strong>Orbit Design:</strong> Defining Low-Earth Orbit (LEO) parameters optimized for specific mission objectives.</li>
+                            <li><strong>Coverage Analysis & Groundstation Visibility:</strong> Simulating communication windows to ensure reliable telemetry downlink and command uplink during overpasses.</li>
+                            <li><strong>Lifetime Estimation:</strong> Analyzing orbital decay factors, such as atmospheric drag, to estimate the 1U CubeSat's functional lifespan before deorbiting.</li>
+                        </ul>
 
                         <h3>System Architecture</h3>
                         <p>The three-node architecture mirrors real satellite subsystem design:</p>
