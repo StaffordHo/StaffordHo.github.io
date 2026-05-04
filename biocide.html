@@ -36,6 +36,26 @@
                             <img src="images/imageanalysisdemo.jpg" alt="Android App Image Analysis Demo" style="width:100%;" />
                         </div>
 
+                        <h3>Demo PDF</h3>
+                        <figure>
+                          <object
+                            data="Demo_PDF.pdf#view=FitH&toolbar=1"
+                            type="application/pdf"
+                            class="pdf-frame"
+                            aria-label="Demo PDF">
+                            <p>
+                              Inline preview isn't available on this device.
+                              <a href="Demo_PDF.pdf" target="_blank" rel="noopener">Open in new tab</a>
+                              or
+                              <a href="Demo_PDF.pdf" download>Download the PDF</a>.
+                            </p>
+                          </object>
+                        </figure>
+                        
+                        <style>
+                        .pdf-frame{width:100%;height:clamp(420px,70vh,1000px);border:1px solid #ddd;border-radius:8px}
+                        </style>
+
                         <h3>Project Overview</h3>
                         <p>This project addresses the problem of bacterial contamination in environments such as fuel tanks. It consists of two main components working together over an IoT network (MQTT): an <strong>Android image analysis application</strong> for detecting microbe concentrations, and an automated <strong>Raspberry Pi dispensing system</strong> that calculates and delivers the exact amount of biocide needed based on the Minimum Inhibitory Concentration (MIC) of the detected bacterial strain.</p>
 
@@ -47,6 +67,13 @@
                             <li><strong>Concentration Calculation:</strong> The app processes the color difference to determine the bacterial concentration (CFU/mL) in the sample.</li>
                             <li><strong>MQTT Transmission:</strong> The calculated concentration and the selected bacterial strain are transmitted wirelessly to the dispensing system via the MQTT protocol.</li>
                         </ul>
+
+                        <div class="video-container">
+                            <video width="100%" controls>
+                                <source src="VID-20250627-WA0001.mp4" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
 
                         <h3>2. Automated Dispensing System (Raspberry Pi)</h3>
                         <p>The physical dispensing hardware is controlled by a Raspberry Pi running a Python script, connected to a 12V peristaltic pump via a GPIO relay.</p>
@@ -64,6 +91,13 @@
                             <li>The calculation converts the required mass (&mu;g) into the required volume (mL) of the biocide stock solution, and then calculates the required pump activation time based on the pump's flow rate (e.g., 10 mL/sec).</li>
                             <li>The GPIO relay is triggered to activate the peristaltic pump for the precise duration calculated, automatically dosing the tank without human intervention.</li>
                         </ol>
+
+                        <div class="video-container">
+                            <video width="100%" controls>
+                                <source src="VID-20250225-WA0006.mp4" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
 
                         <h4>Dispensing Algorithm</h4>
                         <pre><code>def calculate_dispense_time(mic, volume_ml, stock_concentration_mg_per_ml):
