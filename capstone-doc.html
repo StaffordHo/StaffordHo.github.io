@@ -1,0 +1,301 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Capstone Technical Documentation</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+    <style>
+        .major h2,.major h3{border-bottom:2px solid #ddd;padding-bottom:10px}
+        #topButton{display:none;position:fixed;bottom:20px;right:30px;z-index:99;border:none;outline:none;background-color:#000;color:#fff;cursor:pointer;padding:15px;border-radius:10px;font-size:16px}
+        #topButton:hover{background-color:#555}
+        pre{background:#f4f4f4;padding:1em;border-radius:8px;overflow-x:auto;font-size:.88em;line-height:1.5}
+        code{font-family:'Consolas','Monaco',monospace;font-size:.92em}
+        .doc-table{width:100%;border-collapse:collapse;margin:1.5em 0}
+        .doc-table th,.doc-table td{padding:10px 14px;text-align:left;border-bottom:1px solid #eee}
+        .doc-table th{background:#f7f7f7;font-weight:600}
+        .green{color:#27ae60;font-weight:700}
+        .red{color:#e74c3c;font-weight:700}
+        .arch-box{background:#f0f4f8;border-radius:10px;padding:1.5em;margin:1.5em 0;border-left:4px solid #2c3e50}
+        .toc{background:#fafafa;border:1px solid #eee;border-radius:8px;padding:1.2em 1.5em;margin:1.5em 0}
+        .toc ul{margin:0;padding-left:1.2em}
+        .toc li{margin:.3em 0}
+    </style>
+</head>
+<body class="is-preload">
+<div id="wrapper">
+<div id="main">
+<div class="inner">
+    <header id="header">
+        <a href="index.html" class="logo"><strong>Stafford Ho Sheng Xian</strong></a>
+        <ul class="icons">
+            <li><a href="https://github.com/StaffordHo" class="icon brands fa-github"><span class="label">Github</span></a></li>
+            <li><a href="https://www.linkedin.com/in/stafford-ho/" class="icon brands fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
+            <li><a href="index.html#projects" class="icon solid fa-folder"><span class="label">Projects</span><span class="text">Projects</span></a></li>
+            <li><a href="resume.pdf" class="icon solid fa-file-alt" target="_blank"><span class="label">Resume</span><span class="text">Resume</span></a></li>
+        </ul>
+    </header>
+
+    <section>
+        <header class="major">
+            <h2>Technical Documentation &mdash; Generic C++ ONNX Inference Adapter</h2>
+        </header>
+        <p><a href="capstone.html">&larr; Back to Project Overview</a> &nbsp;|&nbsp; <a href="https://github.com/StaffordHo/expert-eureka-CP2" target="_blank">GitHub Repository</a></p>
+
+        <!-- TOC -->
+        <div class="toc">
+            <strong>Contents</strong>
+            <ul>
+                <li><a href="#hardware">1. Target Hardware</a></li>
+                <li><a href="#architecture">2. Adapter Architecture</a></li>
+                <li><a href="#builds">3. Build History &amp; Compilation</a></li>
+                <li><a href="#optimizations">4. Optimization Details</a></li>
+                <li><a href="#os-level">5. OS-Level Tuning</a></li>
+                <li><a href="#benchmarks">6. Benchmark Results</a></li>
+                <li><a href="#api">7. API Reference</a></li>
+                <li><a href="#deployment">8. Deployment</a></li>
+            </ul>
+        </div>
+
+        <!-- 1. Hardware -->
+        <h3 id="hardware">1. Target Hardware &mdash; OMRON FH-L551</h3>
+        <table class="doc-table">
+            <tr><th>Specification</th><th>Value</th><th>Implication</th></tr>
+            <tr><td>CPU</td><td>Intel Atom E3827 (2C/2T, 1.74 GHz)</td><td>No hyperthreading; limited parallel compute</td></tr>
+            <tr><td>L2 Cache</td><td>1 MB (shared)</td><td>640&times;640&times;3 FP32 image = 4.9 MB &mdash; exceeds entire cache</td></tr>
+            <tr><td>Max SIMD</td><td>SSE4.2</td><td><span class="red">No AVX/AVX2</span> &mdash; eliminates OpenVINO, INT8 VNNI, most accelerators</td></tr>
+            <tr><td>RAM</td><td>2 GB DDR3L</td><td>Must avoid heap fragmentation on 24/7 systems</td></tr>
+            <tr><td>OS</td><td>Windows Embedded</td><td>Thread affinity competes with OS kernel threads</td></tr>
+        </table>
+        <p>The <code>check_avx.cpp</code> utility uses CPUID to confirm: <code>SSE4.2: YES | AVX: NO | AVX2: NO</code>. This single diagnostic permanently ruled out three optimization paths.</p>
+
+        <!-- 2. Architecture -->
+        <h3 id="architecture">2. Adapter Architecture</h3>
+        <div class="arch-box">
+            <strong>Design Principle:</strong> The adapter is <em>model-agnostic</em>. It loads any ONNX file, inspects I/O shapes via <code>inspectIO()</code>, and dispatches to the appropriate decoder (PP-OCR, YOLOX, or generic fallback). Unknown models produce diagnostic output instead of crashing.
+        </div>
+
+        <h4>File Structure</h4>
+        <table class="doc-table">
+            <tr><th>File</th><th>Version</th><th>Role</th></tr>
+            <tr><td><code>ONNXInference.h/.cpp</code></td><td>V0</td><td>Baseline adapter. Copy-based <code>infer()</code>, OpenVINO EP support (conditional <code>#ifdef</code>).</td></tr>
+            <tr><td><code>ONNXInference_opt.h/.cpp</code></td><td>V1</td><td>Added <code>inferFixed()</code> zero-copy path using <code>Ort::IoBinding</code>. Removed OpenVINO code.</td></tr>
+            <tr><td><code>ONNXInference_opt_yoloxopt.h/.cpp</code></td><td>V2</td><td>Added binding cache (<code>binding_cache_valid_</code>) to skip re-binding when pointers are unchanged.</td></tr>
+            <tr><td><code>main.cpp</code></td><td>V0</td><td>Baseline harness with <code>makeBlobCHW()</code> (3-pass preprocessing), per-frame allocation.</td></tr>
+            <tr><td><code>main_opt.cpp</code></td><td>V1</td><td>Fused <code>fillBlobCHW()</code>, hoisted allocation, watchdog thread, M4 EWMA supervisor.</td></tr>
+            <tr><td><code>main_opt_yoloxopt.cpp</code></td><td>V2</td><td>Production harness with all optimizations, full YOLOX decode + NMS, generic fallback.</td></tr>
+        </table>
+
+        <h4>Inference Pipeline</h4>
+<pre>
+Image &rarr; Letterbox Resize &rarr; fillBlobCHW (fused BGR&rarr;RGB + normalize + HWC&rarr;CHW)
+      &rarr; inferFixed() (zero-copy IoBinding)
+      &rarr; Decode (PP-OCR DBNet / YOLOX anchor-free / Generic fallback)
+      &rarr; [Optional: REC pipeline for text recognition]
+      &rarr; CSV benchmark log + M4 EWMA compliance check
+</pre>
+
+        <!-- 3. Builds -->
+        <h3 id="builds">3. Build History &amp; Compilation</h3>
+        <p>All builds use MSVC <code>cl.exe</code> from a Visual Studio Developer Command Prompt. Dependencies are installed via <code>setup_deps.ps1</code> (ONNX Runtime 1.17.1 + OpenCV 4.9.0).</p>
+
+        <h4>Build Commands</h4>
+        <p><strong>V0 Baseline:</strong></p>
+<pre>cl /O2 /EHsc /Fe:generic_infer.exe ^
+   main.cpp ONNXInference.cpp ^
+   /I "deps\onnxruntime\include" /I "deps\opencv\build\include" ^
+   /link /LIBPATH:"deps\onnxruntime\lib" /LIBPATH:"deps\opencv\build\x64\vc16\lib" ^
+   onnxruntime.lib opencv_world490.lib</pre>
+
+        <p><strong>V1 Optimized</strong> (<code>build_opt.bat</code>):</p>
+<pre>cl /O2 /EHsc /Fe:optimized_generic_infer.exe ^
+   main_opt.cpp ONNXInference_opt.cpp ^
+   /I "deps\onnxruntime\include" /I "deps\opencv\build\include" ^
+   /link /LIBPATH:"deps\onnxruntime\lib" /LIBPATH:"deps\opencv\build\x64\vc16\lib" ^
+   onnxruntime.lib opencv_world490.lib</pre>
+
+        <p><strong>V2 Final</strong> (<code>build_final_generic_infer.bat</code>):</p>
+<pre>cl /O2 /EHsc /Fe:final_generic_infer.exe ^
+   main_opt_yoloxopt.cpp ONNXInference_opt_yoloxopt.cpp ^
+   /I "deps\onnxruntime\include" /I "deps\opencv\build\include" ^
+   /link /LIBPATH:"deps\onnxruntime\lib" /LIBPATH:"deps\opencv\build\x64\vc16\lib" ^
+   onnxruntime.lib opencv_world490.lib</pre>
+
+        <h4>10 Build Iterations</h4>
+        <table class="doc-table">
+            <tr><th>#</th><th>Build</th><th>Result</th><th>Key Takeaway</th></tr>
+            <tr><td>1</td><td>V0 Baseline</td><td class="green">&check;</td><td>First compilation. Deployed to FH-L551: YOLOX 15,742 ms, PP-OCR 18,943 ms.</td></tr>
+            <tr><td>2</td><td>V0 + OpenVINO EP</td><td class="red">&cross;</td><td>OpenVINO requires AVX2. <code>SIGILL</code> crash on Atom E3827 (SSE4.2-only).</td></tr>
+            <tr><td>3</td><td>V0 + INT8 Quantization</td><td class="red">&cross;</td><td>2.9% <em>slower</em> &mdash; scalar INT8 fallback + de-quantization overhead without AVX2 VNNI.</td></tr>
+            <tr><td>4</td><td>V0 + Thread Pinning</td><td class="red">&cross;</td><td>7.8&times; worse jitter (260 ms vs 33 ms). Cache thrashing with OS threads on 2-core system.</td></tr>
+            <tr><td>5</td><td>V1 Optimized</td><td class="green">&check;</td><td>Three core optimizations: zero-copy IoBinding, fused preprocessing, hoisted allocation.</td></tr>
+            <tr><td>6</td><td>V1 + YOLOX Shape Mismatch</td><td class="red">&cross;</td><td>Hardcoded 4D output shape crashes when loading 3D YOLOX output. Fixed by dynamic <code>inspectIO()</code>.</td></tr>
+            <tr><td>7</td><td>V1 Fixed</td><td class="green">&check;</td><td>Dynamic output shape inference from model metadata. Generic fallback decoder for unknown models.</td></tr>
+            <tr><td>8</td><td>V1 + YOLOX Decode/NMS</td><td class="green">&check;</td><td>Full Megvii-style anchor-free decode across strides {8,16,32} with greedy per-class NMS.</td></tr>
+            <tr><td>9</td><td>V1 Experiments</td><td class="green">&check;</td><td>5-config benchmark (5,000 COCO images each). ORT_ENABLE_ALL = &minus;9.6% latency.</td></tr>
+            <tr><td>10</td><td>V2 Final</td><td class="green">&check;</td><td>Production build. Binding cache, watchdog, M4 EWMA supervisor, CSV logger.</td></tr>
+        </table>
+
+        <!-- 4. Optimizations -->
+        <h3 id="optimizations">4. Optimization Details</h3>
+
+        <h4>4.1 Zero-Copy IoBinding (V1)</h4>
+        <p><strong>Before (V0):</strong> <code>infer()</code> copies all input data into ONNX Runtime&rsquo;s internal buffers, then copies output data back out.</p>
+        <p><strong>After (V1):</strong> <code>inferFixed()</code> binds raw <code>float*</code> pointers via <code>Ort::IoBinding</code>. ONNX Runtime reads/writes directly to caller&rsquo;s memory.</p>
+<pre>// V2 binding cache: skip re-bind when pointers unchanged
+const bool binding_unchanged =
+    binding_cache_valid_ &&
+    last_input_ptrs_ == inputPtrs &&
+    last_output_ptrs_ == outputPtrs;
+
+if (!binding_unchanged) {
+    binding_->ClearBoundInputs();
+    binding_->ClearBoundOutputs();
+    // ... rebind inputs and outputs ...
+    binding_cache_valid_ = true;
+}
+session_->Run(Ort::RunOptions{nullptr}, *binding_);</pre>
+
+        <h4>4.2 Fused Preprocessing (V1)</h4>
+        <p><strong>Before (V0) &mdash; <code>makeBlobCHW()</code>:</strong> 3 separate passes through the image:</p>
+        <ol>
+            <li><code>cv::cvtColor</code> (BGR&rarr;RGB) &mdash; full image scan #1</li>
+            <li><code>convertTo</code> (normalize) &mdash; full image scan #2</li>
+            <li><code>cv::split</code> + <code>memcpy</code> (HWC&rarr;CHW) &mdash; full image scan #3</li>
+        </ol>
+        <p><strong>After (V1) &mdash; <code>fillBlobCHW()</code>:</strong> Single fused loop. For each pixel: read BGR, swap to RGB, normalize, write directly to CHW plane pointers.</p>
+<pre>// Single pass: read BGR, write normalized RGB in CHW layout
+const uint8_t* ptr = bgr.ptr&lt;uint8_t&gt;(0);
+for (int i = 0; i &lt; N; ++i) {
+    float b = ptr[3*i + 0] * scale;
+    float g = ptr[3*i + 1] * scale;
+    float r = ptr[3*i + 2] * scale;
+    if (do_norm) { r = (r - m0)/s0; g = (g - m1)/s1; b = (b - m2)/s2; }
+    pR[i] = r; pG[i] = g; pB[i] = b;
+}</pre>
+
+        <h4>4.3 Hoisted Buffer Allocation (V1)</h4>
+        <p><strong>Before:</strong> <code>std::vector&lt;float&gt; detBlob;</code> declared inside loop &rarr; heap alloc/free every frame.</p>
+        <p><strong>After:</strong> Declared before loop with <code>reserve()</code>. Inside loop: <code>clear()</code> resets size without freeing memory.</p>
+
+        <!-- 5. OS-Level -->
+        <h3 id="os-level">5. OS-Level Tuning</h3>
+
+        <h4>5.1 ONNX Runtime Session Configuration</h4>
+        <table class="doc-table">
+            <tr><th>Configuration</th><th>Mean Latency</th><th>vs Baseline</th><th>Jitter</th><th>Verdict</th></tr>
+            <tr><td>No Graph Opt (Level 0)</td><td>637.4 ms</td><td>+3.9%</td><td>48.3 ms</td><td class="red">Rejected</td></tr>
+            <tr><td>Extended (Level 2)</td><td>613.7 ms</td><td>Baseline</td><td>33.4 ms</td><td><strong>Default</strong></td></tr>
+            <tr><td>All Fused (Level 99)</td><td>554.9 ms</td><td class="green">&minus;9.6%</td><td>62.4 ms</td><td class="green">Best Speed</td></tr>
+            <tr><td>All + Pin Thread</td><td>644.1 ms</td><td>+4.9%</td><td>260.1 ms</td><td class="red">Rejected</td></tr>
+            <tr><td>No Arena Allocator</td><td>627.2 ms</td><td>+2.2%</td><td>44.2 ms</td><td class="red">Rejected</td></tr>
+        </table>
+
+        <h4>5.2 Memory Architecture</h4>
+        <ul>
+            <li><strong>Arena Allocator:</strong> ONNX Runtime pre-reserves a memory pool at startup. Disabling it caused 2.2% latency increase from repeated OS-level <code>malloc</code>/<code>free</code> calls.</li>
+            <li><strong>Hoisted Allocation:</strong> Reduced per-frame heap allocations from ~14 to 0.</li>
+            <li><strong>Zero-Copy IoBinding:</strong> Eliminates internal <code>memcpy</code> &mdash; critical when working set exceeds L2 cache.</li>
+        </ul>
+
+        <h4>5.3 OS Scheduler Interaction</h4>
+        <p><code>SetThreadAffinityMask(GetCurrentThread(), 1)</code> was tested and <strong>rejected</strong>. On a 2-core system, forcing inference to core 0 competes with Windows kernel threads, causing <strong>7.8&times; worse jitter</strong> (260 ms vs 33 ms).</p>
+
+        <!-- 6. Benchmarks -->
+        <h3 id="benchmarks">6. Benchmark Results</h3>
+        <p>All experiments benchmarked across COCO val2017 (5,000 images) with the built-in CSV logger.</p>
+        <table class="doc-table">
+            <tr><th>Model</th><th>V0 Baseline</th><th>V2 Final</th><th>Improvement</th></tr>
+            <tr><td>YOLOX-S (640&times;640)</td><td>15,742 ms</td><td>~7,771 ms</td><td class="green">&minus;50.6%</td></tr>
+            <tr><td>PP-OCR (det + rec)</td><td>18,943 ms</td><td>~10,920 ms</td><td class="green">&minus;42.3%</td></tr>
+        </table>
+        <p>The benchmark harness records: <code>det_pre_ms</code>, <code>det_run_ms</code>, <code>det_decode_ms</code>, <code>rec_total_ms</code>, <code>total_ms</code>, <code>CER</code>, <code>WER</code> per frame.</p>
+
+        <!-- 7. API -->
+        <h3 id="api">7. API Reference</h3>
+<pre>
+// Construction
+ONNXInference engine("model.onnx");                // Default options
+ONNXInference engine("model.onnx", customOpts);     // Custom config
+
+// Legacy inference (copy-based, V0)
+std::vector&lt;Tensor&gt; outputs = engine.infer({inputBlob});
+
+// Zero-copy inference (production, V1+)
+engine.prepareBinding();
+engine.inferFixed(inputPtrs, inputShapes, outputPtrs, outputShapes);
+
+// Shape management
+engine.fixDynamicHW(640, 640);
+engine.fixExactInputShape(0, {1, 3, 48, 320});
+
+// Runtime tuning (triggers session rebuild)
+engine.setIntraOpThreads(2);
+engine.setGraphOptimization(ORT_ENABLE_ALL);
+engine.enableArena(true);
+engine.rebuild();
+</pre>
+
+        <!-- 8. Deployment -->
+        <h3 id="deployment">8. Deployment</h3>
+<pre>
+# Install dependencies
+.\setup_deps.ps1
+
+# Build production binary
+.\build_final_generic_infer.bat
+
+# Package for FH-L551
+.\package_deployment.ps1
+# Creates OMRON_FHL551_Deployment.zip
+
+# Run inference
+final_generic_infer.exe det.onnx rec.onnx --images list.txt --runs 50 --csv results.csv
+final_generic_infer.exe yolox_s.onnx --images coco.txt --opt-level 99 --watchdog-ms 5000 --m4-log
+</pre>
+
+        <ul class="actions">
+            <li><a href="capstone.html" class="button">Back to Project</a></li>
+            <li><a href="https://github.com/StaffordHo/expert-eureka-CP2" class="button" target="_blank">GitHub</a></li>
+        </ul>
+    </section>
+</div>
+</div>
+
+<!-- Sidebar -->
+<div id="sidebar">
+<div class="inner">
+    <section id="search" class="alt"><form method="post" action="#"><input type="text" name="query" id="query" placeholder="Search" /></form></section>
+    <nav id="menu"><header class="major"><h2>Menu</h2></header>
+        <ul>
+            <li><a href="index.html">Homepage</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="lessons-learnt.html">Lessons Learnt</a></li>
+            <li><span class="opener">Collaborations</span><ul><li><a href="systems-engineering-project-2.html#nicher">Nicher</a></li><li><a href="project-4.html">Bolloré Logistics</a></li></ul></li>
+        </ul>
+    </nav>
+    <section><header class="major"><h2>Get in touch</h2></header>
+        <p>Feel free to reach out for any opportunities or inquiries.</p>
+        <ul class="contact">
+            <li class="icon solid fa-envelope"><a href="mailto:stafford_ho@rocketmail.com">stafford_ho@rocketmail.com</a></li>
+            <li class="icon solid fa-phone"><a href="tel:+6585060453">(+65) 8506 0453</a></li>
+            <li class="icon solid fa-home">10 Dover Drive<br />Singapore 138683</li>
+        </ul>
+    </section>
+    <footer id="footer"><p class="copyright">&copy; Stafford Ho Sheng Xian. All rights reserved.</p></footer>
+</div>
+</div>
+</div>
+
+<button id="topButton" onclick="scrollToTop()" title="Go to top">Top</button>
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/browser.min.js"></script>
+<script src="assets/js/breakpoints.min.js"></script>
+<script src="assets/js/util.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'})}
+window.onscroll=function(){var b=document.getElementById("topButton");b.style.display=(document.body.scrollTop>20||document.documentElement.scrollTop>20)?"block":"none"}
+</script>
+</body>
+</html>
