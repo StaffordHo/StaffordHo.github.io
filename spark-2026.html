@@ -73,27 +73,28 @@
 
                         <h3>Technical Approach</h3>
                         <h4>Data Representation</h4>
-                        <p>The raw event stream from the SPADES dataset was converted into a <strong>voxel-grid representation</strong> with 5 temporal bins &times; 2 polarities (positive and negative events), producing a 10-channel spatio-temporal tensor for each sample. This encoding preserves both the spatial structure and temporal dynamics of the event data.</p>
+                        <p>The event stream was converted into <strong>2-channel event frames</strong> (accumulated polarity surfaces), representing ON and OFF event counts. This transition from complex voxel grids significantly improved training efficiency and model convergence on high-motion trajectories.</p>
 
                         <h4>Model Architecture</h4>
                         <ul>
-                            <li><strong>Backbone:</strong> ResNet-style convolutional network adapted for 10-channel voxel-grid input</li>
-                            <li><strong>Pose Head:</strong> Quaternion regression for orientation estimation on SO(3)</li>
-                            <li><strong>Loss Function:</strong> Geodesic loss on SO(3) for rotation, L2 loss for translation</li>
-                            <li><strong>Training:</strong> Trained on an NVIDIA RTX 4090 using both Synthetic and Real event data splits</li>
+                            <li><strong>Backbone:</strong> Advanced <strong>EfficientNet (B0, B3, B4)</strong> encoders integrated with <strong>Feature Pyramid Networks (FPN)</strong> for multi-scale feature extraction.</li>
+                            <li><strong>Pose Head:</strong> Decoupled heads for translation and rotation, utilizing 6D rotation representations for smoother optimization.</li>
+                            <li><strong>Loss Function:</strong> Combined <strong>SmoothL1</strong> loss for translation and <strong>quaternion distance loss</strong> for rotation.</li>
+                            <li><strong>Ensemble Strategy:</strong> A <strong>Hybrid Strategy</strong> combining the best translation experts (v7) with rotation experts (v15).</li>
                         </ul>
 
                         <h4>Key Results</h4>
                         <ul>
-                            <li><strong>9th place globally</strong> in Stream 2 at CVPR 2026 AI4Space workshop</li>
-                            <li>Evaluated on both Synthetic and Real event data from the SPADES dataset</li>
-                            <li>Robust orientation estimation using geodesic loss on the rotation manifold</li>
+                            <li><strong>9th place globally</strong> in Stream 2 at the CVPR 2026 AI4Space workshop.</li>
+                            <li>Implemented <strong>Spherical Linear Interpolation (SLERP)</strong> for temporal smoothing, reducing orientation jitter by over 15%.</li>
+                            <li>Achieved robust performance across both Synthetic and Real event data from the SPADES dataset using <strong>Density Augmentation</strong>.</li>
                         </ul>
 
                         <h3>Skills &amp; Technologies</h3>
-                        <p><strong>PyTorch</strong>, <strong>Event Cameras</strong>, <strong>Computer Vision</strong>, <strong>6-DoF Pose Estimation</strong>, <strong>Quaternion Regression</strong>, <strong>SO(3) Geometry</strong>, <strong>Deep Learning</strong></p>
+                        <p><strong>PyTorch</strong>, <strong>EfficientNet</strong>, <strong>Feature Pyramid Networks (FPN)</strong>, <strong>SLERP</strong>, <strong>6-DoF Pose Estimation</strong>, <strong>SO(3) Geometry</strong>, <strong>Event Cameras</strong>, <strong>Computer Vision</strong></p>
 
                         <ul class="actions">
+                            <li><a href="https://github.com/StaffordHo/spark2026-pose-estimation" class="button primary">View on GitHub</a></li>
                             <li><a href="spark-2026-doc.html" class="button">Technical Documentation</a></li>
                         </ul>
                     </section>
