@@ -1,0 +1,232 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>RoboSim Technical Documentation</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+        <link rel="stylesheet" href="assets/css/main.css" />
+        <style>
+            .major h2, .major h3 { border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+            .video-container, .image.object { margin-bottom: 30px; }
+            #topButton { display: none; position: fixed; bottom: 20px; right: 30px; z-index: 99; border: none; outline: none; background-color: #000; color: white; cursor: pointer; padding: 15px; border-radius: 10px; font-size: 16px; line-height: normal; text-align: center; vertical-align: middle; }
+            #topButton:hover { background-color: #555; }
+        </style>
+    </head>
+    <body class="is-preload">
+        <div id="wrapper">
+            <div id="main">
+                <div class="inner">
+                    <header id="header">
+                        <a href="index.html" class="logo"><strong>Stafford Ho Sheng Xian</strong></a>
+                        <ul class="icons">
+                            <li><a href="https://github.com/StaffordHo" class="icon brands fa-github"><span class="label">Github</span></a></li>
+                            <li><a href="https://www.linkedin.com/in/stafford-ho/" class="icon brands fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
+                            <li><a href="index.html#projects" class="icon solid fa-folder"><span class="label">Projects</span><span class="text">Projects</span></a></li>
+                            <li><a href="resume.pdf" class="icon solid fa-file-alt" target="_blank"><span class="label">Resume</span><span class="text">Resume</span></a></li>
+                        </ul>
+                    </header>
+
+                    <section>
+                        <header class="major">
+                            <h2>RoboSim &mdash; Technical Documentation</h2>
+                        </header>
+                        <p>Technical details of the robotics simulation platform developed for the <a href="robosim.html">Kiro BuildFest Hackathon 2026</a>. This document covers the physics engine, domain ontology, API specification, and system architecture.</p>
+
+                        <h3>1. Forward Kinematics Engine</h3>
+                        <p>The simulation computes link positions using <strong>cumulative homogeneous transforms</strong> through the kinematic tree. For each joint in the chain:</p>
+                        <pre><code># Core FK computation (simplified)
+# T_child = T_parent * R(axis, q) * T_origin
+
+def _compute_fk(robot_state):
+    for joint in kinematic_tree_bfs:
+        # Rotation matrix via Rodrigues' formula
+        joint_rot = rotation_matrix(axis, q)
+        
+        # Cumulative rotation: child inherits all parent rotations
+        child_rot = mat_mul(parent_rot, joint_rot)
+        
+        # Transform origin offset by parent rotation
+        rotated_offset = mat_vec(parent_rot, [ox, oy, oz])
+        
+        # World position = parent + rotated offset
+        child_pos = parent_pos + rotated_offset</code></pre>
+
+                        <p>The rotation matrix R(â, q) for axis-angle representation uses <strong>Rodrigues' formula</strong>:</p>
+                        <pre><code>R(â, q) = cos(q)·I + (1 - cos q)·ââᵀ + sin(q)·[â]×
+
+where [â]× is the skew-symmetric matrix:
+[â]× = | 0   -az   ay |
+       | az   0   -ax |
+       |-ay   ax   0  |</code></pre>
+
+                        <p>This propagates correctly through <strong>branching kinematic trees</strong>, essential for quadrupeds (4 independent leg chains from a single trunk).</p>
+
+                        <h3>2. Joint Control — PD Controller</h3>
+                        <p>Each actuated joint runs a proportional-derivative controller:</p>
+                        <pre><code>τ = Kp · (q_target - q_current) - Kd · q̇_current
+
+# With effort clamping:
+τ = clamp(τ, -max_effort, max_effort)
+
+# Semi-implicit Euler integration:
+q̇_new = q̇ + τ · dt
+q_new = q + q̇_new · dt</code></pre>
+                        <p>Default gains: Kp=50, Kd=5. Configurable per-joint from URDF dynamics parameters.</p>
+
+                        <h3>3. Drone Flight Dynamics</h3>
+                        <p>6-DOF rigid body simulation with rotor thrust model:</p>
+                        <pre><code># Forces in world frame:
+F_thrust = R · [0, 0, F_total]ᵀ  (rotated by body orientation)
+F_drag = -drag_coefficient · velocity
+F_gravity = [0, 0, -m·g]ᵀ
+
+# Linear acceleration:
+a = (F_thrust + F_drag + F_gravity) / mass
+
+# Angular dynamics with PID attitude stabilization:
+τ_roll = Kp_roll · (target_roll - current_roll) - Kd_roll · ω_x
+τ_pitch = Kp_pitch · (target_pitch - current_pitch) - Kd_pitch · ω_y
+τ_yaw = Kp_yaw · (target_yaw_rate - ω_z)
+
+# Quadcopter mixer (X configuration):
+thrust[0] = base + pitch + roll - yaw  # Front-Left
+thrust[1] = base + pitch - roll + yaw  # Front-Right
+thrust[2] = base - pitch - roll - yaw  # Back-Right
+thrust[3] = base - pitch + roll + yaw  # Back-Left</code></pre>
+
+                        <h3>4. Mobile Robot Kinematics</h3>
+                        <p>Three drive models implemented:</p>
+                        <pre><code># Differential Drive (TurtleBot):
+dx = v · cos(θ) · dt
+dy = v · sin(θ) · dt
+dθ = ω · dt
+
+# Ackermann Steering (Racecar):
+R = L / tan(δ)  # Turning radius
+ω = v / R
+dx = v · cos(θ) · dt
+dy = v · sin(θ) · dt
+dθ = ω · dt
+
+# Omnidirectional (Mecanum):
+dx = (vx·cos θ - vy·sin θ) · dt
+dy = (vx·sin θ + vy·cos θ) · dt
+dθ = ω · dt</code></pre>
+
+                        <h3>5. Domain Ontology</h3>
+                        <p>Enterprise-grade domain model following DDD aggregate patterns:</p>
+                        <pre><code>World (Aggregate Root)
+├── PhysicsConfig {gravity, time_step, solver_iterations}
+├── SimulationState {status, sim_time, step_count}
+├── Robot (Aggregate)
+│   ├── Link {name, inertial, visuals[], collisions[]}
+│   ├── Joint {type, parent, child, origin, axis, limits, state}
+│   ├── Sensor {type, parent_link, update_rate, noise}
+│   └── Actuator {joint, control_mode, pid_gains, max_effort}
+├── Drone (Aggregate)
+│   ├── DroneConfig {type, mass, arm_length, rotors[]}
+│   ├── DroneState {pose, velocity, angular_vel, battery}
+│   └── DroneCommand {thrust, roll, pitch, yaw_rate}
+├── MobileRobot (Aggregate)
+│   ├── MobileRobotConfig {drive_type, wheel_radius, track_width}
+│   ├── MobileRobotState {pose, velocity, heading, odometry}
+│   └── MobileRobotCommand {linear_x, linear_y, angular_z}
+└── ManipulationTask
+    ├── GraspableObject {shape, pose, mass, friction}
+    ├── PlacementZone {pose, tolerance, accepts_shapes}
+    └── ManipulationGoal {object, target_zone, tolerance}</code></pre>
+
+                        <h3>6. API Specification</h3>
+                        <p>RESTful API with WebSocket for real-time streaming:</p>
+                        <pre><code># World Management
+POST   /worlds                    → Create simulation world
+GET    /worlds                    → List active worlds
+GET    /worlds/{id}               → Get world state
+POST   /worlds/{id}/control       → Start/pause/stop/reset
+
+# Robot Control
+POST   /worlds/{id}/robots        → Create robot from params
+POST   /worlds/{id}/robots/upload → Upload URDF file
+POST   /worlds/{id}/joints        → Send joint commands
+GET    /worlds/{id}/robots/{rid}/geometry → Get 3D geometry
+
+# Model Library
+GET    /api/models/catalog        → Browse 10 verified models
+POST   /api/models/fetch          → One-click load from GitHub
+GET    /api/models/categories     → List robot categories
+
+# Drones & Mobile Robots
+POST   /api/drones                → Create drone
+POST   /api/drones/command        → Flight commands
+POST   /api/mobile-robots         → Create ground robot
+POST   /api/mobile-robots/command → Drive commands
+
+# WebSocket (real-time)
+WS     /ws/{world_id}             → 60Hz state streaming</code></pre>
+
+                        <h3>7. URDF Parser</h3>
+                        <p>Full XML parser supporting the URDF specification:</p>
+                        <pre><code># Parsed elements:
+- &lt;robot&gt;: name, metadata
+- &lt;link&gt;: inertial (mass, inertia tensor), visual (geometry, material), collision
+- &lt;joint&gt;: type, parent/child, origin (xyz + rpy), axis, limits, dynamics
+- Geometry: box, cylinder, sphere, mesh (with scale)
+- Joint types: revolute, continuous, prismatic, fixed, floating, planar
+
+# Supports both serial chains (arms) and branching trees (quadrupeds)
+# Fixed joints included in FK for proper spatial offsets</code></pre>
+
+                        <h3>8. Test Suite</h3>
+                        <p><strong>62 automated tests</strong> covering all layers:</p>
+                        <pre><code># Run tests:
+python -m pytest tests/ -v
+
+# Coverage:
+- Domain models: Vector3, Quaternion, Joint, Robot, World, Drone, MobileRobot
+- Physics engine: FK, rotation matrices, joint control, reset
+- URDF loader: parsing, limits, fixed joints, joint types
+- API integration: all endpoints, error handling, validation
+- Drone/Mobile: create, command, state queries
+- Model library: catalog, search, fetch</code></pre>
+
+                        <h3>9. Deployment</h3>
+                        <pre><code># Local development:
+pip install -r requirements.txt
+python server.py
+# → http://localhost:8000
+
+# Production (Render.com):
+# .python-version pinned to 3.11.11
+# Auto-deploys on push to main branch
+# Free tier: 512MB RAM, sufficient for kinematic simulation
+
+# Docker:
+docker build -t robosim .
+docker run -p 8000:8000 robosim</code></pre>
+
+                        <hr />
+                        <p><a href="robosim.html">← Back to Project Overview</a> | <a href="https://github.com/StaffordHo/KIROBuildFest" target="_blank">GitHub Repository →</a></p>
+
+                    </section>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="topFunction()" id="topButton" title="Go to top">↑ Top</button>
+        <script src="assets/js/jquery.min.js"></script>
+        <script src="assets/js/browser.min.js"></script>
+        <script src="assets/js/breakpoints.min.js"></script>
+        <script src="assets/js/util.js"></script>
+        <script src="assets/js/main.js"></script>
+        <script>
+            window.onscroll = function() {
+                if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                    document.getElementById("topButton").style.display = "block";
+                } else {
+                    document.getElementById("topButton").style.display = "none";
+                }
+            };
+            function topFunction() { document.body.scrollTop = 0; document.documentElement.scrollTop = 0; }
+        </script>
+    </body>
+</html>
